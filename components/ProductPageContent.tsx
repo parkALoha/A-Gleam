@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatTag } from "@/lib/format";
 import type { Product } from "@/lib/products";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton";
@@ -47,8 +47,8 @@ export default function ProductPageContent({ product }: { product: Product }) {
 
       <div>
         {product.tag && (
-          <span className="inline-block animate-[pop-in_0.4s_ease-out] rounded-full bg-shop-blush-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-            {product.tag}
+          <span className="inline-block animate-[pop-in_0.4s_ease-out] rounded-full bg-shop-blush-500 px-3 py-1 text-xs font-semibold tracking-wide text-white shadow-sm">
+            {formatTag(product.tag)}
           </span>
         )}
         <h1 className="mt-3 text-3xl font-semibold text-shop-text">

@@ -1,34 +1,36 @@
 import Link from "next/link";
 import Image from "next/image";
 import CartIndicator from "@/components/CartIndicator";
+import SearchOverlay from "@/components/SearchOverlay";
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-10">
       <div className="bg-shop-blush-100">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <div className="w-20 sm:w-28" aria-hidden />
-          <Link href="/" className="flex items-center gap-3">
+          <div className="w-12 sm:w-32" aria-hidden />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <Image
               src="/brand/logo-mark-dark.png"
               alt=""
               width={44}
               height={44}
               unoptimized
-              className="h-9 w-9 sm:h-10 sm:w-10"
+              className="h-7 w-7 sm:h-10 sm:w-10"
             />
-            <span className="text-xl font-semibold tracking-widest text-shop-text sm:text-2xl">
+            <span className="text-base font-semibold tracking-wide text-shop-text sm:text-2xl sm:tracking-widest">
               AGLEAMIN3011
             </span>
           </Link>
-          <div className="flex w-20 items-center justify-end gap-4 sm:w-28">
+          <div className="flex w-12 items-center justify-end gap-1.5 sm:w-32 sm:gap-4">
+            <SearchOverlay />
             <span
               className="text-shop-text/70"
               title="บัญชีของฉัน (เร็วๆ นี้)"
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
@@ -55,19 +57,25 @@ export default function Header() {
             หน้าแรก
           </Link>
           <Link
-            href="/#products"
+            href="/?tag=new#products"
             className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าใหม่
           </Link>
           <Link
-            href="/#products"
+            href="/?tag=bestseller#products"
             className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
-            เสื้อทั้งหมด
+            ขายดี
           </Link>
           <Link
-            href="/#products"
+            href="/?tag=all#products"
+            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+          >
+            สินค้าทั้งหมด
+          </Link>
+          <Link
+            href="/?tag=sale#products"
             className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             SALE

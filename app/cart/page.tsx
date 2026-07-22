@@ -1,12 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
-import CartLineItem from "@/components/CartLineItem";
+import CartLineItem, { type VariantOption } from "@/components/CartLineItem";
 
 export default function CartPage() {
-  const { items, totalPrice } = useCart();
+  const { items, totalPrice, hydrated } = useCart();
+  const [variantsBySlug, setVariantsBySlug] = useState<
+    Record<string, VariantOption[]>
+  >({});
+  const [variantsLoaded, setVariantsLoaded] = useState(false);
+
+  const slugsKey = [...new Set(items.map((i) => i.slug))].sort().join(",");
+
+  useEffect(() => {
+    if (!hydrated || !slugsKey) return;
+    const slugs = slugsKey.split(",");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVariantsLoaded(false);
+    Promise.all(
+      slugs.map((slug) =>
+        fetch(`/api/products/${slug}/variants`)
+          .then((res) => (res.ok ? res.json() : { variants: [] }))
+          .then((data) => [slug, data.variants ?? []] as const)
+          .catch(() => [slug, []] as const),
+      ),
+    ).then((entries) => {
+      setVariantsBySlug(Object.fromEntries(entries));
+      setVariantsLoaded(true);
+    });
+  }, [hydrated, slugsKey]);
+
+  if (!hydrated || (items.length > 0 && !variantsLoaded)) {
+    return null;
+  }
 
   if (items.length === 0) {
     return (
@@ -34,7 +63,11 @@ export default function CartPage() {
 
       <div className="mt-6 space-y-4">
         {items.map((item) => (
-          <CartLineItem key={item.lineId} item={item} />
+          <CartLineItem
+            key={item.lineId}
+            item={item}
+            variants={variantsBySlug[item.slug] ?? []}
+          />
         ))}
       </div>
 

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/products";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatTag } from "@/lib/format";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [variantCover, variantSecond] = product.images;
@@ -38,8 +38,8 @@ export default function ProductCard({ product }: { product: Product }) {
           />
         )}
         {product.tag && (
-          <span className="absolute left-3 top-3 animate-[pop-in_0.4s_ease-out] rounded-full bg-shop-blush-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-            {product.tag}
+          <span className="absolute left-3 top-3 animate-[pop-in_0.4s_ease-out] rounded-full bg-shop-blush-500 px-3 py-1 text-xs font-semibold tracking-wide text-white shadow-sm">
+            {formatTag(product.tag)}
           </span>
         )}
         {!product.inStock && (

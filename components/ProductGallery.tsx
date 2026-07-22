@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const THUMBS_PER_PAGE = 3;
@@ -19,6 +19,37 @@ export default function ProductGallery({
   const active = media[activeIndex];
   const isVideo = videoUrl !== undefined && activeIndex === media.length - 1;
   const touchStartX = useRef<number | null>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  // Crossfade: keep the last fully-shown image visible underneath while the
+  // next one fades in, so switching photos never flashes the empty background.
+  const [prevActive, setPrevActive] = useState(active);
+  const [shownSrc, setShownSrc] = useState(active);
+  const [incomingSrc, setIncomingSrc] = useState<string | null>(null);
+  const [fadeIn, setFadeIn] = useState(false);
+
+  if (active !== prevActive) {
+    setPrevActive(active);
+    if (isVideo) {
+      setShownSrc(active);
+      setIncomingSrc(null);
+    } else {
+      setIncomingSrc(active);
+      setFadeIn(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!incomingSrc) return;
+    const raf = requestAnimationFrame(() => setFadeIn(true));
+    return () => cancelAnimationFrame(raf);
+  }, [incomingSrc]);
+
+  function handleFadeEnd() {
+    if (!incomingSrc) return;
+    setShownSrc(incomingSrc);
+    setIncomingSrc(null);
+  }
 
   const pageStart =
     Math.floor(activeIndex / THUMBS_PER_PAGE) * THUMBS_PER_PAGE;
@@ -33,8 +64,14 @@ export default function ProductGallery({
     setActiveIndex((i) => (i - 1 + media.length) % media.length);
   }
 
+  function selectThumb(index: number) {
+    setActiveIndex(index);
+    mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function goToNextThumbPage() {
     setActiveIndex(Math.min(pageStart + THUMBS_PER_PAGE, media.length - 1));
+    mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function handleTouchStart(e: React.TouchEvent) {
@@ -57,7 +94,8 @@ export default function ProductGallery({
   return (
     <div>
       <div
-        className="group relative aspect-[3/4] touch-pan-y select-none overflow-hidden rounded-3xl bg-shop-blush-50"
+        ref={mainRef}
+        className="group relative aspect-[3/4] scroll-mt-28 touch-pan-y select-none overflow-hidden rounded-3xl bg-shop-blush-50"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -68,14 +106,29 @@ export default function ProductGallery({
             className="h-full w-full object-cover"
           />
         ) : (
-          <Image
-            src={active}
-            alt={alt}
-            fill
-            unoptimized
-            className="object-cover"
-            priority
-          />
+          <>
+            <Image
+              src={shownSrc}
+              alt={alt}
+              fill
+              unoptimized
+              className="object-cover"
+              priority
+            />
+            {incomingSrc && (
+              <Image
+                src={incomingSrc}
+                alt={alt}
+                fill
+                unoptimized
+                onLoad={() => setFadeIn(true)}
+                onTransitionEnd={handleFadeEnd}
+                className={`object-cover transition-opacity duration-200 ${
+                  fadeIn ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            )}
+          </>
         )}
 
         {media.length > 1 && (
@@ -91,7 +144,7 @@ export default function ProductGallery({
               ))}
             </div>
 
-            <div className="absolute bottom-3 right-3 flex gap-2">
+            <div className="absolute bottom-3 right-3 hidden gap-2 lg:flex">
               <button
                 type="button"
                 onClick={goPrev}
@@ -128,7 +181,7 @@ export default function ProductGallery({
               <button
                 key={src}
                 type="button"
-                onClick={showMoreBadge ? goToNextThumbPage : () => setActiveIndex(index)}
+                onClick={showMoreBadge ? goToNextThumbPage : () => selectThumb(index)}
                 aria-label={showMoreBadge ? `ดูอีก ${remainingCount} รูป` : undefined}
                 className={`relative aspect-[3/4] overflow-hidden rounded-xl ring-2 transition-all ${
                   index === activeIndex

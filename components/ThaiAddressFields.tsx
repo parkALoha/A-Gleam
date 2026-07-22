@@ -75,6 +75,7 @@ export default function ThaiAddressFields() {
       <div>
         <label className="text-sm font-medium text-shop-text">จังหวัด</label>
         <select
+          id="province_select"
           required
           disabled={!loaded}
           value={provinceId}
@@ -93,6 +94,7 @@ export default function ThaiAddressFields() {
       <div>
         <label className="text-sm font-medium text-shop-text">อำเภอ/เขต</label>
         <select
+          id="district_select"
           required
           disabled={!provinceId}
           value={districtId}
@@ -111,6 +113,7 @@ export default function ThaiAddressFields() {
       <div>
         <label className="text-sm font-medium text-shop-text">ตำบล/แขวง</label>
         <select
+          id="subdistrict_select"
           required
           disabled={!districtId}
           value={subdistrictId}
@@ -129,6 +132,7 @@ export default function ThaiAddressFields() {
       <div>
         <label className="text-sm font-medium text-shop-text">รหัสไปรษณีย์</label>
         <input
+          id="postal_code"
           required
           name="postal_code"
           value={postalCode}

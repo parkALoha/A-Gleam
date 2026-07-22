@@ -8,7 +8,7 @@ import ThaiAddressFields from "@/components/ThaiAddressFields";
 
 export default function CheckoutForm() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, hydrated } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +16,41 @@ export default function CheckoutForm() {
     e.preventDefault();
     setError(null);
 
+    const form = e.currentTarget;
+
+    const requiredFields: { id: string; message: string }[] = [
+      { id: "customer_name", message: "กรุณากรอกชื่อ-นามสกุล" },
+      { id: "customer_phone", message: "กรุณากรอกเบอร์โทรศัพท์" },
+      { id: "address_line", message: "กรุณากรอกที่อยู่ (บ้านเลขที่ / ถนน / หมู่บ้าน)" },
+      { id: "province_select", message: "กรุณาเลือกจังหวัด" },
+      { id: "district_select", message: "กรุณาเลือกอำเภอ/เขต" },
+      { id: "subdistrict_select", message: "กรุณาเลือกตำบล/แขวง" },
+      { id: "postal_code", message: "กรุณากรอกรหัสไปรษณีย์" },
+      { id: "slip", message: "กรุณาแนบรูปสลิปโอนเงิน" },
+    ];
+
+    for (const field of requiredFields) {
+      const el = document.getElementById(field.id) as
+        | HTMLInputElement
+        | HTMLSelectElement
+        | null;
+      if (el && !el.validity.valid) {
+        el.setCustomValidity(field.message);
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.reportValidity();
+        const clearCustomValidity = () => el.setCustomValidity("");
+        el.addEventListener("input", clearCustomValidity, { once: true });
+        el.addEventListener("change", clearCustomValidity, { once: true });
+        setError(field.message);
+        return;
+      }
+    }
+
     if (items.length === 0) {
       setError("ตะกร้าว่างอยู่");
       return;
     }
 
-    const form = e.currentTarget;
     const formData = new FormData(form);
     formData.set(
       "items",
@@ -52,8 +81,12 @@ export default function CheckoutForm() {
     }
   }
 
+  if (!hydrated) {
+    return null;
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+    <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
       <div className="rounded-2xl bg-white p-5 ring-1 ring-shop-blush-100">
         <p className="font-medium text-shop-text">สรุปรายการ</p>
         <ul className="mt-3 space-y-1.5 text-sm text-shop-text-soft">
