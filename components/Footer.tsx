@@ -28,8 +28,10 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="#"
-              aria-label="Facebook (เร็วๆ นี้)"
+              href="https://www.facebook.com/agleamin3011"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
               className="text-shop-text-soft transition-colors hover:text-shop-blush-600"
             >
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
@@ -37,8 +39,10 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="#"
-              aria-label="TikTok (เร็วๆ นี้)"
+              href="https://www.tiktok.com/@agleamin3011"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok"
               className="text-shop-text-soft transition-colors hover:text-shop-blush-600"
             >
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden>
