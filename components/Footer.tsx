@@ -54,7 +54,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-shop-blush-200 py-4 text-center text-xs text-shop-text-soft">
-        © {new Date().getFullYear()} A GLEAM | อะ - กลีม สงวนลิขสิทธิ์
+        © 2020 A GLEAM | อะ - กลีม สงวนลิขสิทธิ์
       </div>
     </footer>
   );
