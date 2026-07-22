@@ -6,7 +6,21 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
 
-export default function CheckoutForm() {
+type CheckoutDefaultValues = {
+  customer_name: string;
+  customer_phone: string;
+  address_line: string;
+  subdistrict: string;
+  district: string;
+  province: string;
+  postal_code: string;
+};
+
+export default function CheckoutForm({
+  defaultValues,
+}: {
+  defaultValues?: CheckoutDefaultValues;
+}) {
   const router = useRouter();
   const { items, totalPrice, clearCart, hydrated } = useCart();
   const [submitting, setSubmitting] = useState(false);
@@ -113,6 +127,7 @@ export default function CheckoutForm() {
           id="customer_name"
           name="customer_name"
           required
+          defaultValue={defaultValues?.customer_name}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
         />
       </div>
@@ -126,6 +141,7 @@ export default function CheckoutForm() {
           name="customer_phone"
           type="tel"
           required
+          defaultValue={defaultValues?.customer_phone}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
         />
       </div>
@@ -139,11 +155,23 @@ export default function CheckoutForm() {
           name="address_line"
           required
           rows={2}
+          defaultValue={defaultValues?.address_line}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
         />
       </div>
 
-      <ThaiAddressFields />
+      <ThaiAddressFields
+        defaultNames={
+          defaultValues
+            ? {
+                province: defaultValues.province,
+                district: defaultValues.district,
+                subdistrict: defaultValues.subdistrict,
+                postalCode: defaultValues.postal_code,
+              }
+            : undefined
+        }
+      />
 
       <div>
         <label className="text-sm font-medium text-shop-text" htmlFor="slip">

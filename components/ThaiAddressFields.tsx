@@ -15,7 +15,16 @@ type Tambon = {
 const selectClass =
   "mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500 disabled:bg-shop-beige-100 disabled:text-shop-text-soft";
 
-export default function ThaiAddressFields() {
+export default function ThaiAddressFields({
+  defaultNames,
+}: {
+  defaultNames?: {
+    province: string;
+    district: string;
+    subdistrict: string;
+    postalCode: string;
+  };
+}) {
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [amphures, setAmphures] = useState<Amphure[]>([]);
   const [tambons, setTambons] = useState<Tambon[]>([]);
@@ -31,12 +40,29 @@ export default function ThaiAddressFields() {
       fetch("/data/thai-address/provinces.json").then((r) => r.json()),
       fetch("/data/thai-address/amphures.json").then((r) => r.json()),
       fetch("/data/thai-address/tambons.json").then((r) => r.json()),
-    ]).then(([p, a, t]) => {
+    ]).then(([p, a, t]: [Province[], Amphure[], Tambon[]]) => {
       setProvinces(p);
       setAmphures(a);
       setTambons(t);
       setLoaded(true);
+
+      // Prefill from the customer's last order (once, on load) — resolve
+      // the stored names back to ids so the cascading dropdowns line up.
+      if (defaultNames?.province) {
+        const province = p.find((x) => x.name === defaultNames.province);
+        const district = a.find(
+          (x) => x.name === defaultNames.district && x.provinceId === province?.id,
+        );
+        const subdistrict = t.find(
+          (x) => x.name === defaultNames.subdistrict && x.districtId === district?.id,
+        );
+        if (province) setProvinceId(province.id);
+        if (district) setDistrictId(district.id);
+        if (subdistrict) setSubdistrictId(subdistrict.id);
+        setPostalCode(defaultNames.postalCode);
+      }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const districtOptions = amphures.filter((a) => a.provinceId === provinceId);

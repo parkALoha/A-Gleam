@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { generateOrderNumber } from "@/lib/order-number";
 
 const orderFieldsSchema = z.object({
@@ -136,6 +137,11 @@ export async function POST(request: Request) {
     totalAmount += Number(product.price) * item.quantity;
   }
 
+  const sessionClient = await createServerSupabaseClient();
+  const {
+    data: { user: loggedInCustomer },
+  } = await sessionClient.auth.getUser();
+
   const orderId = crypto.randomUUID();
   const orderNumber = generateOrderNumber();
   const slipExt = slip.type.split("/")[1] || "jpg";
@@ -165,6 +171,7 @@ export async function POST(request: Request) {
     total_amount: totalAmount,
     slip_image_path: slipPath,
     status: "pending_verification",
+    customer_id: loggedInCustomer?.id ?? null,
   });
 
   if (orderError) {

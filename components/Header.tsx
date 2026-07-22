@@ -2,8 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import CartIndicator from "@/components/CartIndicator";
 import SearchOverlay from "@/components/SearchOverlay";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-export default function Header() {
+export default async function Header() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <header className="sticky top-0 z-10">
       <div className="bg-shop-blush-100">
@@ -24,9 +30,10 @@ export default function Header() {
           </Link>
           <div className="flex w-12 items-center justify-end gap-1.5 sm:w-32 sm:gap-4">
             <SearchOverlay />
-            <span
-              className="text-shop-text/70"
-              title="บัญชีของฉัน (เร็วๆ นี้)"
+            <Link
+              href={user ? "/account/orders" : "/login"}
+              aria-label={user ? "บัญชีของฉัน" : "เข้าสู่ระบบ"}
+              className="text-shop-text/70 transition-colors hover:text-shop-blush-600"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -42,7 +49,7 @@ export default function Header() {
                   d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
                 />
               </svg>
-            </span>
+            </Link>
             <CartIndicator />
           </div>
         </div>

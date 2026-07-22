@@ -1,9 +1,29 @@
 import Image from "next/image";
 import { getShopSettings } from "@/lib/shop-settings";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import CheckoutForm from "@/components/CheckoutForm";
 
 export default async function CheckoutPage() {
   const settings = await getShopSettings();
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let defaultValues;
+  if (user) {
+    const { data: lastOrder } = await supabase
+      .from("orders")
+      .select(
+        "customer_name, customer_phone, address_line, subdistrict, district, province, postal_code",
+      )
+      .eq("customer_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    defaultValues = lastOrder ?? undefined;
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
@@ -48,7 +68,7 @@ export default async function CheckoutPage() {
         </div>
       </div>
 
-      <CheckoutForm />
+      <CheckoutForm defaultValues={defaultValues} />
     </div>
   );
 }
