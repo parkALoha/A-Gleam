@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  /* A GLEAM brand palette, sampled from ColourPalettes.JPG (Spring Neutrals) */
+  --background: #f0e6dc; /* Ivory */
+  --foreground: #3f3a37;
+  --shop-cream: #f0e6dc; /* Ivory */
+  --shop-blush-50: #f2e0d6; /* Pearl */
+  --shop-blush-100: #e9d9ca; /* Blush */
+  --shop-blush-300: #e7b9ac; /* Salmon */
+  --shop-blush-500: #9c827b; /* Dusty Rose, darkened for text/accent contrast */
+  --shop-blush-600: #87716b; /* Dusty Rose, darkened further for button/CTA contrast */
+  --shop-beige-100: #e2cdba; /* Nude */
+  --shop-coral: #f6bead; /* Coral, matches the logo's real peach background */
+  --shop-text: #3f3a37;
+  --shop-text-soft: #8a7f78;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-shop-cream: var(--shop-cream);
+  --color-shop-blush-50: var(--shop-blush-50);
+  --color-shop-blush-100: var(--shop-blush-100);
+  --color-shop-blush-300: var(--shop-blush-300);
+  --color-shop-blush-500: var(--shop-blush-500);
+  --color-shop-blush-600: var(--shop-blush-600);
+  --color-shop-beige-100: var(--shop-beige-100);
+  --color-shop-coral: var(--shop-coral);
+  --color-shop-text: var(--shop-text);
+  --color-shop-text-soft: var(--shop-text-soft);
+  --font-sans: var(--font-prompt);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
