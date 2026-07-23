@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
+import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 
 export default function CustomerAuthForm() {
   const router = useRouter();
@@ -130,6 +131,8 @@ export default function CustomerAuthForm() {
               required
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
+              onInvalid={thaiInvalidMessage}
+              onInput={clearCustomValidity}
               className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
             />
           </div>
@@ -171,6 +174,8 @@ export default function CustomerAuthForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onInvalid={thaiInvalidMessage}
+              onInput={clearCustomValidity}
               className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
             />
           </div>

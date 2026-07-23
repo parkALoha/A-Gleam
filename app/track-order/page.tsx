@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatPrice } from "@/lib/format";
+import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 
 type OrderResult = {
   orderNumber: string;
@@ -65,6 +66,8 @@ export default function TrackOrderPage() {
             required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            onInvalid={thaiInvalidMessage}
+            onInput={clearCustomValidity}
             className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
           />
         </div>

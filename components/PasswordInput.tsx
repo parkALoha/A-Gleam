@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 
 export default function PasswordInput({
   id,
@@ -29,6 +30,8 @@ export default function PasswordInput({
         autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onInvalid={thaiInvalidMessage}
+        onInput={clearCustomValidity}
         className="w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 pr-11 text-sm text-shop-text outline-none focus:border-shop-blush-500"
       />
       <button

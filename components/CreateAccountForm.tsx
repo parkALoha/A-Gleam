@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
+import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 
 export default function CreateAccountForm({
   orderNumber,
@@ -91,6 +92,8 @@ export default function CreateAccountForm({
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onInvalid={thaiInvalidMessage}
+          onInput={clearCustomValidity}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
         />
       </div>
