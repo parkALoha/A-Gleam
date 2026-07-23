@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
 
 type ProfileValues = {
@@ -154,15 +155,29 @@ export default function ProfileForm({
       />
 
       {error && <p className="text-sm text-red-500">{error}</p>}
-      {success && <p className="text-sm text-green-600">บันทึกสำเร็จ</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-      </button>
+      {success && showWelcome ? (
+        <div className="rounded-xl bg-green-50 p-3 text-center">
+          <p className="text-sm text-green-600">บันทึกสำเร็จ ขอบคุณครับ</p>
+          <Link
+            href="/"
+            className="mt-3 inline-block rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02]"
+          >
+            ไปช้อปต่อ
+          </Link>
+        </div>
+      ) : (
+        <>
+          {success && <p className="text-sm text-green-600">บันทึกสำเร็จ</p>}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+          </button>
+        </>
+      )}
     </form>
   );
 }
