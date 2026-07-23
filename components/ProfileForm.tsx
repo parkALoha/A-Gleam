@@ -23,11 +23,14 @@ export default function ProfileForm({
   showWelcome: boolean;
 }) {
   const router = useRouter();
+  const [editing, setEditing] = useState(showWelcome);
   const [fullName, setFullName] = useState(initialValues.full_name);
   const [phone, setPhone] = useState(initialValues.phone);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const fieldClass =
+    "mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500 disabled:bg-shop-beige-100 disabled:text-shop-text-soft";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -82,6 +85,7 @@ export default function ProfileForm({
         return;
       }
       setSuccess(true);
+      setEditing(showWelcome);
       router.refresh();
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -111,7 +115,8 @@ export default function ProfileForm({
           id="full_name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+          disabled={!editing}
+          className={fieldClass}
         />
       </div>
 
@@ -124,7 +129,8 @@ export default function ProfileForm({
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+          disabled={!editing}
+          className={fieldClass}
         />
       </div>
 
@@ -137,11 +143,13 @@ export default function ProfileForm({
           name="address_line"
           rows={2}
           defaultValue={initialValues.address_line}
-          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+          disabled={!editing}
+          className={fieldClass}
         />
       </div>
 
       <ThaiAddressFields
+        readOnly={!editing}
         defaultNames={
           initialValues.province
             ? {
@@ -169,13 +177,23 @@ export default function ProfileForm({
       ) : (
         <>
           {success && <p className="text-sm text-green-600">บันทึกสำเร็จ</p>}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-          </button>
+          {editing ? (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="w-full rounded-full border border-shop-blush-200 px-8 py-2.5 text-sm font-semibold text-shop-text transition-colors hover:bg-shop-blush-50"
+            >
+              แก้ไขข้อมูล
+            </button>
+          )}
         </>
       )}
     </form>

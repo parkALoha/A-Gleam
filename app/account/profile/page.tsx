@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import ProfileForm from "@/components/ProfileForm";
 import AccountLogoutButton from "@/components/AccountLogoutButton";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default async function ProfilePage({
   searchParams,
@@ -21,7 +22,7 @@ export default async function ProfilePage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, phone, address_line, subdistrict, district, province, postal_code",
+      "full_name, phone, address_line, subdistrict, district, province, postal_code, avatar_url",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -33,6 +34,14 @@ export default async function ProfilePage({
           ข้อมูลส่วนตัว
         </h1>
         <AccountLogoutButton />
+      </div>
+
+      <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
+        <AvatarUpload
+          userId={user.id}
+          initialAvatarUrl={profile?.avatar_url ?? null}
+          fallbackLabel={profile?.full_name || user.email || "?"}
+        />
       </div>
 
       <ProfileForm

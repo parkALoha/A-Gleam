@@ -11,6 +11,18 @@ export default async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let avatarUrl: string | null = null;
+  let fallbackLabel = "";
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("avatar_url, full_name")
+      .eq("id", user.id)
+      .maybeSingle();
+    avatarUrl = profile?.avatar_url ?? null;
+    fallbackLabel = profile?.full_name || user.email || "";
+  }
+
   return (
     <header className="sticky top-0 z-10">
       <div className="bg-shop-blush-100">
@@ -32,7 +44,7 @@ export default async function Header() {
           <div className="flex w-12 items-center justify-end gap-1.5 sm:w-32 sm:gap-4">
             <SearchOverlay />
             {user ? (
-              <AccountMenu />
+              <AccountMenu avatarUrl={avatarUrl} fallbackLabel={fallbackLabel} />
             ) : (
               <Link
                 href="/login"

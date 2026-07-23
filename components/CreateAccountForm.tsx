@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
+import SocialAuthButtons from "@/components/SocialAuthButtons";
 
 export default function CreateAccountForm({
   orderNumber,
@@ -135,6 +136,13 @@ export default function CreateAccountForm({
       >
         {submitting ? "กำลังสร้างบัญชี..." : "สร้างบัญชี"}
       </button>
+
+      <div className="my-4 flex items-center gap-3 text-xs text-shop-text-soft">
+        <div className="h-px flex-1 bg-shop-blush-100" />
+        หรือ
+        <div className="h-px flex-1 bg-shop-blush-100" />
+      </div>
+      <SocialAuthButtons callbackParams={{ orderNumber, phone }} />
     </form>
   );
 }

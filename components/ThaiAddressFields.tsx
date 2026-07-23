@@ -17,6 +17,7 @@ const selectClass =
 
 export default function ThaiAddressFields({
   defaultNames,
+  readOnly = false,
 }: {
   defaultNames?: {
     province: string;
@@ -24,6 +25,7 @@ export default function ThaiAddressFields({
     subdistrict: string;
     postalCode: string;
   };
+  readOnly?: boolean;
 }) {
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [amphures, setAmphures] = useState<Amphure[]>([]);
@@ -103,7 +105,7 @@ export default function ThaiAddressFields({
         <select
           id="province_select"
           required
-          disabled={!loaded}
+          disabled={!loaded || readOnly}
           value={provinceId}
           onChange={(e) => handleProvinceChange(e.target.value)}
           className={selectClass}
@@ -122,7 +124,7 @@ export default function ThaiAddressFields({
         <select
           id="district_select"
           required
-          disabled={!provinceId}
+          disabled={!provinceId || readOnly}
           value={districtId}
           onChange={(e) => handleDistrictChange(e.target.value)}
           className={selectClass}
@@ -141,7 +143,7 @@ export default function ThaiAddressFields({
         <select
           id="subdistrict_select"
           required
-          disabled={!districtId}
+          disabled={!districtId || readOnly}
           value={subdistrictId}
           onChange={(e) => handleSubdistrictChange(e.target.value)}
           className={selectClass}
@@ -165,6 +167,7 @@ export default function ThaiAddressFields({
           onChange={(e) => setPostalCode(e.target.value)}
           inputMode="numeric"
           maxLength={5}
+          disabled={readOnly}
           className={selectClass}
         />
       </div>
