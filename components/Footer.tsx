@@ -54,7 +54,15 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-shop-blush-200 py-4 text-center text-xs text-shop-text-soft">
-        © 2020 A GLEAM | อะ - กลีม สงวนลิขสิทธิ์
+        <div className="flex justify-center gap-4">
+          <a href="/privacy-policy" className="hover:text-shop-blush-600">
+            นโยบายความเป็นส่วนตัว
+          </a>
+          <a href="/data-deletion" className="hover:text-shop-blush-600">
+            การลบข้อมูลผู้ใช้
+          </a>
+        </div>
+        <p className="mt-2">© 2020 A GLEAM | อะ - กลีม สงวนลิขสิทธิ์</p>
       </div>
     </footer>
   );
