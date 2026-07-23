@@ -13,16 +13,37 @@ export default async function CheckoutPage() {
 
   let defaultValues;
   if (user) {
-    const { data: lastOrder } = await supabase
-      .from("orders")
+    const { data: profile } = await supabase
+      .from("profiles")
       .select(
-        "customer_name, customer_phone, address_line, subdistrict, district, province, postal_code",
+        "full_name, phone, address_line, subdistrict, district, province, postal_code",
       )
-      .eq("customer_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
+      .eq("id", user.id)
       .maybeSingle();
-    defaultValues = lastOrder ?? undefined;
+
+    if (profile?.address_line) {
+      defaultValues = {
+        customer_name: profile.full_name ?? "",
+        customer_phone: profile.phone ?? "",
+        address_line: profile.address_line,
+        subdistrict: profile.subdistrict ?? "",
+        district: profile.district ?? "",
+        province: profile.province ?? "",
+        postal_code: profile.postal_code ?? "",
+      };
+    } else {
+      // No saved profile address yet — fall back to their last order.
+      const { data: lastOrder } = await supabase
+        .from("orders")
+        .select(
+          "customer_name, customer_phone, address_line, subdistrict, district, province, postal_code",
+        )
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      defaultValues = lastOrder ?? undefined;
+    }
   }
 
   return (

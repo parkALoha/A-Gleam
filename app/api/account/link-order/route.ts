@@ -21,7 +21,9 @@ export async function POST(request: Request) {
   // else's order just by knowing (or guessing) the order number.
   const { data: order, error: fetchError } = await supabase
     .from("orders")
-    .select("id, customer_phone, customer_id")
+    .select(
+      "id, customer_phone, customer_id, customer_name, address_line, subdistrict, district, province, postal_code",
+    )
     .eq("order_number", body.data.orderNumber.trim())
     .maybeSingle();
 
@@ -41,6 +43,22 @@ export async function POST(request: Request) {
   if (updateError) {
     return NextResponse.json({ error: "ผูกบัญชีไม่สำเร็จ" }, { status: 500 });
   }
+
+  // Seed the new profile with this order's details, so checkout autofill,
+  // phone login, and "ข้อมูลส่วนตัว" all work right away without asking
+  // the customer to type everything in again.
+  await supabase
+    .from("profiles")
+    .update({
+      phone: order.customer_phone,
+      full_name: order.customer_name,
+      address_line: order.address_line,
+      subdistrict: order.subdistrict,
+      district: order.district,
+      province: order.province,
+      postal_code: order.postal_code,
+    })
+    .eq("id", body.data.userId);
 
   return NextResponse.json({ success: true });
 }

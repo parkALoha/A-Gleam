@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function CreateAccountForm({
   orderNumber,
@@ -12,6 +13,7 @@ export default function CreateAccountForm({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -19,6 +21,12 @@ export default function CreateAccountForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
+      return;
+    }
+
     setSubmitting(true);
 
     const supabase = createBrowserSupabaseClient();
@@ -90,15 +98,32 @@ export default function CreateAccountForm({
         <label className="text-sm font-medium text-shop-text" htmlFor="signup_password">
           ตั้งรหัสผ่าน
         </label>
-        <input
-          id="signup_password"
-          type="password"
-          required
-          minLength={6}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
-        />
+        <div className="mt-1.5">
+          <PasswordInput
+            id="signup_password"
+            value={password}
+            onChange={setPassword}
+            required
+            minLength={6}
+            autoComplete="new-password"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <label className="text-sm font-medium text-shop-text" htmlFor="signup_password_confirm">
+          ยืนยันรหัสผ่านอีกครั้ง
+        </label>
+        <div className="mt-1.5">
+          <PasswordInput
+            id="signup_password_confirm"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            required
+            minLength={6}
+            autoComplete="new-password"
+          />
+        </div>
       </div>
 
       {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
