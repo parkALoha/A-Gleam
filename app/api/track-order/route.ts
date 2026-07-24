@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const { data: orders, error } = await supabase
     .from("orders")
     .select(
-      "order_number, status, total_amount, created_at, order_items(product_name, color_name, unit_price, quantity)",
+      "order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
     .eq("customer_phone", body.data.phone.trim())
     .order("created_at", { ascending: false })
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       status: order.status,
       statusLabel: ORDER_STATUS_LABELS[order.status] ?? order.status,
       totalAmount: order.total_amount,
+      trackingNumber: order.tracking_number,
       createdAt: order.created_at,
       items: order.order_items,
     })),

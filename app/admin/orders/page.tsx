@@ -7,6 +7,8 @@ import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 const TABS = [
   { status: "pending_verification", label: "รอตรวจสอบ" },
   { status: "confirmed", label: "ยืนยันแล้ว" },
+  { status: "shipped", label: "จัดส่งแล้ว" },
+  { status: "delivered", label: "จัดส่งสำเร็จ" },
   { status: "rejected", label: "ปฏิเสธแล้ว" },
   { status: "all", label: "ทั้งหมด" },
 ] as const;
@@ -36,12 +38,12 @@ export default async function AdminOrdersPage({
     <div className="mx-auto max-w-4xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">จัดการคำสั่งซื้อ</h1>
 
-      <div className="mt-6 flex gap-2 rounded-full bg-shop-blush-50 p-1 text-sm font-medium">
+      <div className="mt-6 flex gap-2 overflow-x-auto rounded-full bg-shop-blush-50 p-1 text-sm font-medium">
         {TABS.map((tab) => (
           <Link
             key={tab.status}
             href={`/admin/orders?status=${tab.status}`}
-            className={`flex-1 rounded-full py-2 text-center transition-colors ${
+            className={`shrink-0 rounded-full px-4 py-2 text-center transition-colors ${
               activeStatus === tab.status
                 ? "bg-white text-shop-blush-600 shadow-sm"
                 : "text-shop-text-soft hover:text-shop-text"

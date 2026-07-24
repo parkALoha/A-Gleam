@@ -17,7 +17,7 @@ export default async function AccountOrdersPage() {
   const { data: orders } = await supabase
     .from("orders")
     .select(
-      "order_number, status, total_amount, created_at, order_items(product_name, color_name, unit_price, quantity)",
+      "order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
     .order("created_at", { ascending: false });
 
@@ -73,6 +73,11 @@ export default async function AccountOrdersPage() {
                   {formatPrice(order.total_amount)}
                 </span>
               </div>
+              {order.tracking_number && (
+                <p className="mt-2 text-xs text-shop-text-soft">
+                  เลขพัสดุ: {order.tracking_number}
+                </p>
+              )}
             </div>
           ))}
         </div>

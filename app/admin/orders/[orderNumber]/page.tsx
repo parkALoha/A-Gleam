@@ -19,7 +19,7 @@ export default async function AdminOrderDetailPage({
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "order_number, customer_name, customer_phone, address_line, subdistrict, district, province, postal_code, total_amount, slip_image_path, status, admin_note, created_at, order_items(product_name, color_name, unit_price, quantity)",
+      "order_number, customer_name, customer_phone, address_line, subdistrict, district, province, postal_code, total_amount, slip_image_path, status, admin_note, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
     .eq("order_number", orderNumber)
     .maybeSingle();
@@ -84,6 +84,12 @@ export default async function AdminOrderDetailPage({
           </p>
         )}
 
+        {order.tracking_number && (
+          <p className="mt-4 rounded-xl bg-shop-beige-100 p-3 text-xs text-shop-text-soft">
+            เลขพัสดุ: {order.tracking_number}
+          </p>
+        )}
+
         <div className="mt-4 border-t border-shop-blush-100 pt-4">
           <p className="text-sm font-medium text-shop-text">สลิปโอนเงิน</p>
           {signedSlip?.signedUrl ? (
@@ -103,9 +109,7 @@ export default async function AdminOrderDetailPage({
           )}
         </div>
 
-        {order.status === "pending_verification" && (
-          <OrderActions orderNumber={order.order_number} />
-        )}
+        <OrderActions orderNumber={order.order_number} status={order.status} />
       </div>
     </div>
   );

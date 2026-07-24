@@ -8,6 +8,7 @@ type OrderResult = {
   orderNumber: string;
   statusLabel: string;
   totalAmount: number;
+  trackingNumber: string | null;
   createdAt: string;
   items: { product_name: string; color_name: string; unit_price: number; quantity: number }[];
 };
@@ -122,6 +123,11 @@ export default function TrackOrderPage() {
                   {formatPrice(order.totalAmount)}
                 </span>
               </div>
+              {order.trackingNumber && (
+                <p className="mt-2 text-xs text-shop-text-soft">
+                  เลขพัสดุ: {order.trackingNumber}
+                </p>
+              )}
             </div>
           ))}
         </div>
