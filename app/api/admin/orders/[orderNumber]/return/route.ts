@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
-
-const schema = z.object({ trackingNumber: z.string().trim().optional() });
 
 export async function POST(
   request: Request,
@@ -15,19 +12,13 @@ export async function POST(
   }
 
   const { orderNumber } = await params;
-  const body = schema.safeParse(await request.json().catch(() => ({})));
-  const trackingNumber = body.success ? body.data.trackingNumber : undefined;
 
   const supabase = createServiceClient();
   const { data: order, error } = await supabase
     .from("orders")
-    .update({
-      status: "shipped",
-      tracking_number: trackingNumber || null,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ status: "returned", updated_at: new Date().toISOString() })
     .eq("order_number", orderNumber)
-    .eq("status", "confirmed")
+    .eq("status", "shipped")
     .select("id")
     .maybeSingle();
 

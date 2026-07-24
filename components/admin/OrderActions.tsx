@@ -15,7 +15,6 @@ export default function OrderActions({
   const [error, setError] = useState<string | null>(null);
   const [showRejectNote, setShowRejectNote] = useState(false);
   const [note, setNote] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
 
   async function post(path: string, body?: object) {
     setSubmitting(true);
@@ -29,9 +28,9 @@ export default function OrderActions({
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "เกิดข้อผิดพลาด");
-        return;
+        return false;
       }
-      router.refresh();
+      return true;
     } finally {
       setSubmitting(false);
     }
@@ -39,20 +38,25 @@ export default function OrderActions({
 
   async function handleConfirm() {
     if (!confirm("ยืนยันคำสั่งซื้อนี้? สต็อกสินค้าจะถูกตัดทันที")) return;
-    await post("confirm");
+    if (await post("confirm")) router.refresh();
   }
 
   async function handleReject() {
-    await post("reject", { note });
+    if (await post("reject", { note })) router.refresh();
   }
 
-  async function handleShip() {
-    await post("ship", { trackingNumber });
+  async function handlePrintLabel() {
+    if (await post("print-label")) router.push(`/admin/orders/${orderNumber}/label`);
   }
 
   async function handleDeliver() {
     if (!confirm("ยืนยันว่าลูกค้าได้รับสินค้าแล้ว?")) return;
-    await post("deliver");
+    if (await post("deliver")) router.refresh();
+  }
+
+  async function handleReturn() {
+    if (!confirm("ยืนยันว่าพัสดุนี้ถูกตีกลับ?")) return;
+    if (await post("return")) router.refresh();
   }
 
   if (status === "pending_verification") {
@@ -119,39 +123,43 @@ export default function OrderActions({
     return (
       <div className="mt-4 space-y-2">
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <label className="text-sm font-medium text-shop-text" htmlFor="tracking_number">
-          เลขพัสดุ (ไม่บังคับ)
-        </label>
-        <input
-          id="tracking_number"
-          value={trackingNumber}
-          onChange={(e) => setTrackingNumber(e.target.value)}
-          className="w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
-        />
         <button
           type="button"
-          onClick={handleShip}
+          onClick={handlePrintLabel}
           disabled={submitting}
           className="w-full rounded-full bg-shop-blush-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitting ? "กำลังดำเนินการ..." : "ทำเครื่องหมายว่าจัดส่งแล้ว"}
+          {submitting ? "กำลังสร้าง label..." : "พิมพ์ใบ Label"}
         </button>
+        <p className="text-xs text-shop-text-soft">
+          จะสร้างเลขพัสดุ (mock) และเปลี่ยนสถานะเป็น &quot;จัดส่งแล้ว&quot; ให้อัตโนมัติ
+        </p>
       </div>
     );
   }
 
   if (status === "shipped") {
     return (
-      <div className="mt-4 space-y-2">
+      <div className="mt-4 space-y-3">
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <button
-          type="button"
-          onClick={handleDeliver}
-          disabled={submitting}
-          className="w-full rounded-full bg-shop-blush-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {submitting ? "กำลังดำเนินการ..." : "ทำเครื่องหมายว่าจัดส่งสำเร็จ"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleDeliver}
+            disabled={submitting}
+            className="flex-1 rounded-full bg-shop-blush-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "กำลังดำเนินการ..." : "ทำเครื่องหมายว่าจัดส่งสำเร็จ"}
+          </button>
+          <button
+            type="button"
+            onClick={handleReturn}
+            disabled={submitting}
+            className="flex-1 rounded-full border border-red-200 px-6 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            ตีกลับ
+          </button>
+        </div>
       </div>
     );
   }

@@ -13,7 +13,7 @@ export default function AdminSidebar({ adminEmail }: { adminEmail: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex shrink-0 flex-col border-b border-shop-blush-100 bg-white px-4 py-4 md:w-56 md:border-b-0 md:border-r md:py-6">
+    <aside className="flex shrink-0 flex-col border-b border-shop-blush-100 bg-white px-4 py-4 print:hidden md:w-56 md:border-b-0 md:border-r md:py-6">
       <div className="flex items-center justify-between md:block">
         <p className="text-sm font-semibold tracking-wide text-shop-text">
           A GLEAM <span className="text-shop-blush-500">แอดมิน</span>

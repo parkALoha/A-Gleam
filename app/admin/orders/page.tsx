@@ -6,9 +6,10 @@ import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 
 const TABS = [
   { status: "pending_verification", label: "รอตรวจสอบ" },
-  { status: "confirmed", label: "ยืนยันแล้ว" },
+  { status: "confirmed", label: "รอจัดส่ง" },
   { status: "shipped", label: "จัดส่งแล้ว" },
   { status: "delivered", label: "จัดส่งสำเร็จ" },
+  { status: "returned", label: "ตีกลับ" },
   { status: "rejected", label: "ปฏิเสธแล้ว" },
   { status: "all", label: "ทั้งหมด" },
 ] as const;
