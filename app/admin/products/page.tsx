@@ -4,6 +4,7 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import PublishToggle from "@/components/admin/PublishToggle";
+import TagQuickSelect from "@/components/admin/TagQuickSelect";
 
 export default async function AdminProductsPage() {
   await getAdminSession();
@@ -67,14 +68,16 @@ export default async function AdminProductsPage() {
                         {formatPrice(product.compare_at_price)}
                       </span>
                     ) : null}
-                    {product.tag ? ` · ${product.tag}` : ""}
                   </p>
                   <p className="text-xs text-shop-text-soft">
                     {product.product_variants.length} สี · สต็อกรวม {totalStock}
                   </p>
                 </div>
 
-                <PublishToggle productId={product.id} isPublished={product.is_published} />
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <PublishToggle productId={product.id} isPublished={product.is_published} />
+                  <TagQuickSelect productId={product.id} tag={product.tag} />
+                </div>
               </Link>
             );
           })}
