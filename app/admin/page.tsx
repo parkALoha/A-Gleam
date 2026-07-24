@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getAdminSession } from "@/lib/auth";
 import AdminLogoutButton from "@/components/AdminLogoutButton";
 
@@ -13,8 +14,16 @@ export default async function AdminHomePage() {
         <p className="mt-1 text-sm text-shop-text-soft">
           ยินดีต้อนรับ {user.email}
         </p>
+        <div className="mt-6">
+          <Link
+            href="/admin/orders"
+            className="inline-block rounded-full bg-shop-blush-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02]"
+          >
+            จัดการคำสั่งซื้อ
+          </Link>
+        </div>
         <p className="mt-4 text-sm text-shop-text-soft">
-          แผงควบคุมแอดมิน (จัดการสินค้า/ออเดอร์/ตั้งค่า) กำลังจะมาเร็วๆ นี้
+          แผงจัดการสินค้า/ตั้งค่า กำลังจะมาเร็วๆ นี้
         </p>
         <div className="mt-6">
           <AdminLogoutButton />

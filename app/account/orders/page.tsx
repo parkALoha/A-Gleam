@@ -2,12 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import AccountLogoutButton from "@/components/AccountLogoutButton";
-
-const STATUS_LABELS: Record<string, string> = {
-  pending_verification: "รอตรวจสอบการชำระเงิน",
-  confirmed: "ยืนยันคำสั่งซื้อแล้ว รอจัดส่ง",
-  rejected: "การชำระเงินไม่ถูกต้อง กรุณาติดต่อร้าน",
-};
+import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 
 export default async function AccountOrdersPage() {
   const supabase = await createServerSupabaseClient();
@@ -58,7 +53,7 @@ export default async function AccountOrdersPage() {
                   </p>
                 </div>
                 <span className="rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
-                  {STATUS_LABELS[order.status] ?? order.status}
+                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
                 </span>
               </div>
 

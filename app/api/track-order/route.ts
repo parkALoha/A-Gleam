@@ -2,16 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 
 const schema = z.object({
   phone: z.string().trim().min(1),
 });
-
-const STATUS_LABELS: Record<string, string> = {
-  pending_verification: "รอตรวจสอบการชำระเงิน",
-  confirmed: "ยืนยันคำสั่งซื้อแล้ว รอจัดส่ง",
-  rejected: "การชำระเงินไม่ถูกต้อง กรุณาติดต่อร้าน",
-};
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -55,7 +50,7 @@ export async function POST(request: Request) {
     orders: orders.map((order) => ({
       orderNumber: order.order_number,
       status: order.status,
-      statusLabel: STATUS_LABELS[order.status] ?? order.status,
+      statusLabel: ORDER_STATUS_LABELS[order.status] ?? order.status,
       totalAmount: order.total_amount,
       createdAt: order.created_at,
       items: order.order_items,

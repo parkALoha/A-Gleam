@@ -5,10 +5,11 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 /**
  * Verifies the caller is logged in AND flagged `is_admin` in `profiles`
  * (not just "logged in" — that used to be the whole check, which becomes a
- * hole the moment customers can create accounts too) — the "secure" check
- * every admin Server Action / Route Handler must call before mutating data.
+ * hole the moment customers can create accounts too). Returns null instead
+ * of redirecting, for use in Route Handlers (`redirect()` from
+ * next/navigation is only valid in Server Components/Actions).
  */
-export async function getAdminSession() {
+export async function getAdminUser() {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -16,7 +17,7 @@ export async function getAdminSession() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    redirect("/admin/login");
+    return null;
   }
 
   const { data: profile } = await supabase
@@ -26,8 +27,21 @@ export async function getAdminSession() {
     .maybeSingle();
 
   if (!profile?.is_admin) {
-    redirect("/admin/login");
+    return null;
   }
 
+  return user;
+}
+
+/**
+ * Same admin check as `getAdminUser`, but redirects to the admin login page
+ * instead — the check every admin Server Component page must call before
+ * rendering.
+ */
+export async function getAdminSession() {
+  const user = await getAdminUser();
+  if (!user) {
+    redirect("/admin/login");
+  }
   return user;
 }
