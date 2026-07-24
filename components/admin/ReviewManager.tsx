@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ImageUploader from "@/components/admin/ImageUploader";
+import { useConfirm } from "@/components/admin/useConfirm";
 
 export type ReviewItem = {
   id: string;
@@ -17,6 +18,7 @@ export type ReviewItem = {
 
 function ReviewRow({ review }: { review: ReviewItem }) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirm();
   const [editing, setEditing] = useState(false);
   const [values, setValues] = useState(review);
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +82,7 @@ function ReviewRow({ review }: { review: ReviewItem }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`ลบรีวิวของ "${review.customerHandle}" ถาวร?`)) return;
+    if (!(await confirm(`ลบรีวิวของ "${review.customerHandle}" ถาวร?`))) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -157,6 +159,7 @@ function ReviewRow({ review }: { review: ReviewItem }) {
 
   return (
     <div className="flex items-start gap-3 rounded-xl border border-shop-blush-100 p-3">
+      {dialog}
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-shop-beige-100">
         {review.imageUrl && (
           <Image src={review.imageUrl} alt="" fill unoptimized className="object-cover" />

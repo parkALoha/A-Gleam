@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
+import { useConfirm } from "@/components/admin/useConfirm";
 
 const TAG_OPTIONS = [
   { value: "", label: "ไม่มีป้าย" },
@@ -69,6 +70,7 @@ export default function ProductForm({
   initialValues?: ProductFormValues;
 }) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirm();
   const isEditing = Boolean(initialValues);
   const [values, setValues] = useState<ProductFormValues>(initialValues ?? EMPTY_VALUES);
   const [slugTouched, setSlugTouched] = useState(isEditing);
@@ -108,7 +110,7 @@ export default function ProductForm({
       return;
     }
 
-    if (!confirm(`ลบสี "${variant.colorName}" ถาวร?`)) return;
+    if (!(await confirm(`ลบสี "${variant.colorName}" ถาวร?`))) return;
 
     try {
       const res = await fetch(`/api/admin/products/${values.id}/variants/${variant.id}`, {
@@ -130,7 +132,7 @@ export default function ProductForm({
   }
 
   async function handleDeleteProduct() {
-    if (!confirm(`ลบสินค้า "${values.name}" ถาวร? ไม่สามารถย้อนกลับได้`)) return;
+    if (!(await confirm(`ลบสินค้า "${values.name}" ถาวร? ไม่สามารถย้อนกลับได้`))) return;
 
     setSubmitting(true);
     setError(null);
@@ -207,6 +209,7 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {dialog}
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
         <div>
           <label className="text-sm font-medium text-shop-text" htmlFor="name">

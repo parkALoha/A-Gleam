@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirm } from "@/components/admin/useConfirm";
 
 export default function OrderActions({
   orderNumber,
@@ -11,6 +12,7 @@ export default function OrderActions({
   status: string;
 }) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirm();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRejectNote, setShowRejectNote] = useState(false);
@@ -40,7 +42,7 @@ export default function OrderActions({
   }
 
   async function handleConfirm() {
-    if (!confirm("ยืนยันคำสั่งซื้อนี้? สต็อกสินค้าจะถูกตัดทันที")) return;
+    if (!(await confirm("ยืนยันคำสั่งซื้อนี้? สต็อกสินค้าจะถูกตัดทันที"))) return;
     if (await post("confirm")) router.refresh();
   }
 
@@ -53,18 +55,19 @@ export default function OrderActions({
   }
 
   async function handleDeliver() {
-    if (!confirm("ยืนยันว่าลูกค้าได้รับสินค้าแล้ว?")) return;
+    if (!(await confirm("ยืนยันว่าลูกค้าได้รับสินค้าแล้ว?"))) return;
     if (await post("deliver")) router.refresh();
   }
 
   async function handleReturn() {
-    if (!confirm("ยืนยันว่าพัสดุนี้ถูกตีกลับ?")) return;
+    if (!(await confirm("ยืนยันว่าพัสดุนี้ถูกตีกลับ?"))) return;
     if (await post("return")) router.refresh();
   }
 
   if (status === "pending_verification") {
     return (
       <div className="mt-4 space-y-3">
+        {dialog}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         {!showRejectNote ? (
@@ -144,6 +147,7 @@ export default function OrderActions({
   if (status === "shipped") {
     return (
       <div className="mt-4 space-y-3">
+        {dialog}
         {error && <p className="text-sm text-red-500">{error}</p>}
         <div className="flex gap-3">
           <button

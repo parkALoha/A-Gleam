@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/useToast";
 
 const TAG_OPTIONS = [
   { value: "", label: "ไม่มีป้าย" },
@@ -19,6 +20,7 @@ export default function TagQuickSelect({
   tag: string | null;
 }) {
   const router = useRouter();
+  const { showToast, toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -31,30 +33,33 @@ export default function TagQuickSelect({
         body: JSON.stringify({ tag: e.target.value || null }),
       });
       if (!res.ok) {
-        alert("อัปเดตป้ายไม่สำเร็จ ลองใหม่อีกครั้ง");
+        showToast("อัปเดตป้ายไม่สำเร็จ ลองใหม่อีกครั้ง");
         return;
       }
       router.refresh();
     } catch {
-      alert("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
+      showToast("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <select
-      value={tag ?? ""}
-      onClick={(e) => e.stopPropagation()}
-      onChange={handleChange}
-      disabled={submitting}
-      className="shrink-0 rounded-full border border-shop-blush-200 bg-white px-3 py-1 text-xs font-medium text-shop-text outline-none focus:border-shop-blush-500 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {TAG_OPTIONS.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <>
+      {toast}
+      <select
+        value={tag ?? ""}
+        onClick={(e) => e.stopPropagation()}
+        onChange={handleChange}
+        disabled={submitting}
+        className="shrink-0 rounded-full border border-shop-blush-200 bg-white px-3 py-1 text-xs font-medium text-shop-text outline-none focus:border-shop-blush-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {TAG_OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </>
   );
 }
