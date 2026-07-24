@@ -31,7 +31,7 @@ export default function SearchOverlay() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="ค้นหาสินค้า"
-        className="text-shop-text/70 transition-colors hover:text-shop-blush-600"
+        className="rounded-full p-1.5 text-shop-text/70 transition-colors hover:bg-shop-blush-50 hover:text-shop-blush-600"
       >
         <svg
           viewBox="0 0 24 24"

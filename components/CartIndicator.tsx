@@ -10,7 +10,7 @@ export default function CartIndicator() {
     <Link
       href="/cart"
       aria-label="ตะกร้าสินค้า"
-      className="relative inline-flex items-center justify-center text-shop-text transition-colors hover:text-shop-blush-600"
+      className="relative inline-flex items-center justify-center rounded-full p-1.5 text-shop-text transition-colors hover:bg-shop-blush-50 hover:text-shop-blush-600"
     >
       <svg
         viewBox="0 0 24 24"

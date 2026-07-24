@@ -3,6 +3,17 @@ import { createServiceClient } from "@/lib/supabase/service";
 import ShopSettingsForm from "@/components/admin/ShopSettingsForm";
 import ReviewManager from "@/components/admin/ReviewManager";
 
+// Supabase's inferred type for a to-one embed (via a unique FK) is an
+// array, but the actual response at runtime is a single object — handle
+// both shapes since the client-generated types don't reflect the DB's
+// unique constraint on reviews.order_id.
+function getOrderNumber(
+  orders: { order_number: string } | { order_number: string }[] | null,
+): string | null {
+  if (!orders) return null;
+  return Array.isArray(orders) ? (orders[0]?.order_number ?? null) : orders.order_number;
+}
+
 export default async function AdminSettingsPage() {
   await getAdminSession();
 
@@ -16,7 +27,7 @@ export default async function AdminSettingsPage() {
       .single(),
     supabase
       .from("reviews")
-      .select("id, customer_handle, image_url, caption, rating, is_visible")
+      .select("id, customer_handle, image_url, caption, rating, is_visible, orders(order_number)")
       .order("sort_order", { ascending: true }),
   ]);
 
@@ -47,6 +58,7 @@ export default async function AdminSettingsPage() {
             caption: r.caption,
             rating: r.rating,
             isVisible: r.is_visible,
+            orderNumber: getOrderNumber(r.orders),
           }))}
         />
       </div>

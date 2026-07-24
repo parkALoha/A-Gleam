@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
@@ -32,9 +33,15 @@ export default async function AccountOrdersPage({
   const { data: allOrders } = await supabase
     .from("orders")
     .select(
-      "order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
+      "id, order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
     .order("created_at", { ascending: false });
+
+  const { data: myReviews } = await supabase
+    .from("reviews")
+    .select("order_id")
+    .eq("customer_id", user.id);
+  const reviewedOrderIds = new Set((myReviews ?? []).map((r) => r.order_id));
 
   const counts: Record<string, number> = {};
   for (const order of allOrders ?? []) {
@@ -111,6 +118,20 @@ export default async function AccountOrdersPage({
                 <p className="mt-2 text-xs text-shop-text-soft">
                   เลขพัสดุ: {order.tracking_number}
                 </p>
+              )}
+              {order.status === "delivered" && (
+                <div className="mt-3 border-t border-shop-blush-100 pt-3">
+                  {reviewedOrderIds.has(order.id) ? (
+                    <p className="text-xs text-shop-text-soft">รีวิวแล้ว ขอบคุณค่ะ</p>
+                  ) : (
+                    <Link
+                      href={`/account/orders/${order.order_number}/review`}
+                      className="inline-block rounded-full bg-shop-blush-500 px-4 py-1.5 text-xs font-semibold text-white transition-transform hover:scale-[1.02]"
+                    >
+                      เขียนรีวิว
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           ))}

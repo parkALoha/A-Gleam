@@ -49,7 +49,7 @@ export default async function Header() {
               <Link
                 href="/login"
                 aria-label="เข้าสู่ระบบ"
-                className="text-shop-text/70 transition-colors hover:text-shop-blush-600"
+                className="rounded-full p-1.5 text-shop-text/70 transition-colors hover:bg-shop-blush-50 hover:text-shop-blush-600"
               >
                 <svg
                   viewBox="0 0 24 24"

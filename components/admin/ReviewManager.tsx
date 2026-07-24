@@ -12,6 +12,7 @@ export type ReviewItem = {
   caption: string | null;
   rating: number;
   isVisible: boolean;
+  orderNumber?: string | null;
 };
 
 function ReviewRow({ review }: { review: ReviewItem }) {
@@ -147,6 +148,9 @@ function ReviewRow({ review }: { review: ReviewItem }) {
         <p className="truncate text-sm font-medium text-shop-text">{review.customerHandle}</p>
         <p className="truncate text-xs text-shop-text-soft">{review.caption}</p>
         <p className="text-xs text-shop-text-soft">{"★".repeat(review.rating)}</p>
+        {review.orderNumber && (
+          <p className="text-xs text-shop-blush-600">จากออเดอร์ {review.orderNumber}</p>
+        )}
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <button
