@@ -29,8 +29,10 @@ const PROVIDERS: { provider: Provider; label: string; icon: React.ReactNode }[] 
 
 export default function SocialAuthButtons({
   callbackParams,
+  disabled,
 }: {
   callbackParams?: Record<string, string>;
+  disabled?: boolean;
 }) {
   async function handleClick(provider: Provider) {
     const supabase = createBrowserSupabaseClient();
@@ -51,7 +53,8 @@ export default function SocialAuthButtons({
           key={label}
           type="button"
           onClick={() => handleClick(provider)}
-          className="flex items-center justify-center gap-2 rounded-full border border-shop-blush-100 bg-white px-3 py-2 text-sm text-shop-text transition-colors hover:bg-shop-blush-50"
+          disabled={disabled}
+          className="flex items-center justify-center gap-2 rounded-full border border-shop-blush-100 bg-white px-3 py-2 text-sm text-shop-text transition-colors hover:bg-shop-blush-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {icon}
           {label}

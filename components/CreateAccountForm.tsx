@@ -16,6 +16,7 @@ export default function CreateAccountForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -26,6 +27,11 @@ export default function CreateAccountForm({
 
     if (password !== confirmPassword) {
       setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
+      return;
+    }
+
+    if (!agreed) {
+      setError("กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานก่อน");
       return;
     }
 
@@ -130,11 +136,30 @@ export default function CreateAccountForm({
         </div>
       </div>
 
+      <label className="mt-3 flex items-start gap-2 text-xs text-shop-text-soft">
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          className="mt-0.5"
+        />
+        <span>
+          ฉันยอมรับ{" "}
+          <a href="/privacy-policy" target="_blank" className="text-shop-blush-600 underline">
+            นโยบายความเป็นส่วนตัว
+          </a>{" "}
+          และ{" "}
+          <a href="/terms" target="_blank" className="text-shop-blush-600 underline">
+            ข้อกำหนดการใช้งาน
+          </a>
+        </span>
+      </label>
+
       {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
 
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !agreed}
         className="mt-4 w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? "กำลังสร้างบัญชี..." : "สร้างบัญชี"}
@@ -145,7 +170,7 @@ export default function CreateAccountForm({
         หรือ
         <div className="h-px flex-1 bg-shop-blush-100" />
       </div>
-      <SocialAuthButtons callbackParams={{ orderNumber, phone }} />
+      <SocialAuthButtons callbackParams={{ orderNumber, phone }} disabled={!agreed} />
     </form>
   );
 }

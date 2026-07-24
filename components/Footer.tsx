@@ -54,9 +54,12 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-shop-blush-200 py-4 text-center text-xs text-shop-text-soft">
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
           <a href="/privacy-policy" className="hover:text-shop-blush-600">
             นโยบายความเป็นส่วนตัว
+          </a>
+          <a href="/terms" className="hover:text-shop-blush-600">
+            ข้อกำหนดการใช้งาน
           </a>
           <a href="/data-deletion" className="hover:text-shop-blush-600">
             การลบข้อมูลผู้ใช้
