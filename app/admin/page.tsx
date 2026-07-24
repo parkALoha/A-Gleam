@@ -48,9 +48,18 @@ export default async function AdminHomePage() {
         </Link>
       </div>
 
-      <p className="mt-4 text-sm text-shop-text-soft">
-        แผงตั้งค่าอื่นๆ กำลังจะมาเร็วๆ นี้
-      </p>
+      <div className="mt-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-shop-blush-100">
+        <p className="font-medium text-shop-text">ตั้งค่าร้าน</p>
+        <p className="mt-1 text-sm text-shop-text-soft">
+          บัญชีรับโอนเงิน, แบนเนอร์หน้าแรก, รีวิวลูกค้า
+        </p>
+        <Link
+          href="/admin/settings"
+          className="mt-4 inline-block rounded-full bg-shop-blush-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02]"
+        >
+          ตั้งค่าร้าน
+        </Link>
+      </div>
     </div>
   );
 }
