@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({
   orderNumber: z.string().trim().min(1),
@@ -9,6 +10,14 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (!checkRateLimit(`link-order:${ip}`, 10, 15 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
+      { status: 429 },
+    );
+  }
+
   const body = schema.safeParse(await request.json().catch(() => null));
   if (!body.success) {
     return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });

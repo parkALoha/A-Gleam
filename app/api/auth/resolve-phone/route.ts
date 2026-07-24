@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({ phone: z.string().trim().min(1) });
 
 // Supabase's password login only takes an email — this looks up which
 // account a phone number belongs to, so the login form can accept either.
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (!checkRateLimit(`resolve-phone:${ip}`, 10, 15 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
+      { status: 429 },
+    );
+  }
+
   const body = schema.safeParse(await request.json().catch(() => null));
   if (!body.success) {
     return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
