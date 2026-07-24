@@ -37,13 +37,15 @@ function ReviewRow({ review }: { review: ReviewItem }) {
           isVisible: values.isVisible,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "บันทึกไม่สำเร็จ");
+        setError(data?.error ?? `บันทึกไม่สำเร็จ (${res.status})`);
         return;
       }
       setEditing(false);
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
@@ -51,8 +53,9 @@ function ReviewRow({ review }: { review: ReviewItem }) {
 
   async function handleToggleVisible() {
     setSubmitting(true);
+    setError(null);
     try {
-      await fetch(`/api/admin/reviews/${review.id}`, {
+      const res = await fetch(`/api/admin/reviews/${review.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,7 +66,14 @@ function ReviewRow({ review }: { review: ReviewItem }) {
           isVisible: !review.isVisible,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? `อัปเดตไม่สำเร็จ (${res.status})`);
+        return;
+      }
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
@@ -72,9 +82,17 @@ function ReviewRow({ review }: { review: ReviewItem }) {
   async function handleDelete() {
     if (!confirm(`ลบรีวิวของ "${review.customerHandle}" ถาวร?`)) return;
     setSubmitting(true);
+    setError(null);
     try {
-      await fetch(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? `ลบไม่สำเร็จ (${res.status})`);
+        return;
+      }
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
@@ -138,7 +156,7 @@ function ReviewRow({ review }: { review: ReviewItem }) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-shop-blush-100 p-3">
+    <div className="flex items-start gap-3 rounded-xl border border-shop-blush-100 p-3">
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-shop-beige-100">
         {review.imageUrl && (
           <Image src={review.imageUrl} alt="" fill unoptimized className="object-cover" />
@@ -151,6 +169,7 @@ function ReviewRow({ review }: { review: ReviewItem }) {
         {review.orderNumber && (
           <p className="text-xs text-shop-blush-600">จากออเดอร์ {review.orderNumber}</p>
         )}
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
         <button
@@ -209,9 +228,9 @@ export default function ReviewManager({ reviews }: { reviews: ReviewItem[] }) {
           rating: newRating,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "เพิ่มรีวิวไม่สำเร็จ");
+        setError(data?.error ?? `เพิ่มรีวิวไม่สำเร็จ (${res.status})`);
         return;
       }
       setNewHandle("");
@@ -220,6 +239,8 @@ export default function ReviewManager({ reviews }: { reviews: ReviewItem[] }) {
       setNewImage([]);
       setAdding(false);
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

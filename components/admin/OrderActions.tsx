@@ -25,12 +25,15 @@ export default function OrderActions({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body ?? {}),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "เกิดข้อผิดพลาด");
+        setError(data?.error ?? `เกิดข้อผิดพลาด (${res.status})`);
         return false;
       }
       return true;
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
+      return false;
     } finally {
       setSubmitting(false);
     }

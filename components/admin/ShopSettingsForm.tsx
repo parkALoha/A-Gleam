@@ -48,13 +48,15 @@ export default function ShopSettingsForm({
           reviewsSectionEnabled: values.reviewsSectionEnabled,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "บันทึกไม่สำเร็จ");
+        setError(data?.error ?? `บันทึกไม่สำเร็จ (${res.status})`);
         return;
       }
       setSuccess(true);
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

@@ -110,19 +110,23 @@ export default function ProductForm({
 
     if (!confirm(`ลบสี "${variant.colorName}" ถาวร?`)) return;
 
-    const res = await fetch(`/api/admin/products/${values.id}/variants/${variant.id}`, {
-      method: "DELETE",
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error ?? "ลบสีไม่สำเร็จ");
-      return;
-    }
+    try {
+      const res = await fetch(`/api/admin/products/${values.id}/variants/${variant.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(data?.error ?? `ลบสีไม่สำเร็จ (${res.status})`);
+        return;
+      }
 
-    update(
-      "variants",
-      values.variants.filter((_, i) => i !== index),
-    );
+      update(
+        "variants",
+        values.variants.filter((_, i) => i !== index),
+      );
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
+    }
   }
 
   async function handleDeleteProduct() {
@@ -132,12 +136,14 @@ export default function ProductForm({
     setError(null);
     try {
       const res = await fetch(`/api/admin/products/${values.id}`, { method: "DELETE" });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "ลบสินค้าไม่สำเร็จ");
+        setError(data?.error ?? `ลบสินค้าไม่สำเร็จ (${res.status})`);
         return;
       }
       router.push("/admin/products");
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

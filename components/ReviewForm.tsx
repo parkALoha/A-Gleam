@@ -37,13 +37,15 @@ export default function ReviewForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, imageUrl, caption, rating }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error ?? "ส่งรีวิวไม่สำเร็จ");
+        setError(data?.error ?? `ส่งรีวิวไม่สำเร็จ (${res.status})`);
         return;
       }
       setDone(true);
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

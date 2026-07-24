@@ -36,9 +36,9 @@ export default function CustomerAuthForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone: loginEmail }),
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
         if (!res.ok) {
-          setError(data.error ?? "ไม่พบบัญชีนี้");
+          setError(data?.error ?? "ไม่พบบัญชีนี้");
           return;
         }
         loginEmail = data.email;
@@ -57,6 +57,8 @@ export default function CustomerAuthForm() {
 
       router.push("/account/orders");
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
@@ -86,6 +88,8 @@ export default function CustomerAuthForm() {
 
       router.push("/account/profile?welcome=1");
       router.refresh();
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

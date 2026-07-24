@@ -18,8 +18,16 @@ export default function PublishToggle({
     e.stopPropagation();
     setSubmitting(true);
     try {
-      await fetch(`/api/admin/products/${productId}/toggle-publish`, { method: "POST" });
+      const res = await fetch(`/api/admin/products/${productId}/toggle-publish`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        alert("อัปเดตไม่สำเร็จ ลองใหม่อีกครั้ง");
+        return;
+      }
       router.refresh();
+    } catch {
+      alert("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }

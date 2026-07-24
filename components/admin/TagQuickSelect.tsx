@@ -25,12 +25,18 @@ export default function TagQuickSelect({
     e.stopPropagation();
     setSubmitting(true);
     try {
-      await fetch(`/api/admin/products/${productId}/tag`, {
+      const res = await fetch(`/api/admin/products/${productId}/tag`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tag: e.target.value || null }),
       });
+      if (!res.ok) {
+        alert("อัปเดตป้ายไม่สำเร็จ ลองใหม่อีกครั้ง");
+        return;
+      }
       router.refresh();
+    } catch {
+      alert("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
