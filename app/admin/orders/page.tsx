@@ -60,27 +60,27 @@ export default async function AdminOrdersPage({
             <Link
               key={order.order_number}
               href={`/admin/orders/${order.order_number}`}
-              className="flex items-center justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100 transition-colors hover:bg-shop-blush-50/50"
+              className="block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100 transition-colors hover:bg-shop-blush-50/50"
             >
-              <div>
+              <div className="flex items-start justify-between gap-3">
                 <p className="font-semibold text-shop-text">{order.order_number}</p>
-                <p className="text-sm text-shop-text-soft">
-                  {order.customer_name} · {order.customer_phone}
-                </p>
-                <p className="mt-0.5 text-xs text-shop-text-soft">
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
+                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                </span>
+              </div>
+              <p className="mt-1.5 text-sm text-shop-text-soft">
+                {order.customer_name} · {order.customer_phone}
+              </p>
+              <div className="mt-3 flex items-center justify-between border-t border-shop-blush-100 pt-3">
+                <p className="text-xs text-shop-text-soft">
                   {new Date(order.created_at).toLocaleString("th-TH", {
                     dateStyle: "long",
                     timeStyle: "short",
                   })}
                 </p>
-              </div>
-              <div className="text-right">
                 <p className="font-semibold text-shop-blush-600">
                   {formatPrice(order.total_amount)}
                 </p>
-                <span className="mt-1 inline-block rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
-                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
-                </span>
               </div>
             </Link>
           ))}
