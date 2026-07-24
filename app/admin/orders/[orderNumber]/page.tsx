@@ -5,7 +5,6 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
-import AdminLogoutButton from "@/components/AdminLogoutButton";
 import OrderActions from "@/components/admin/OrderActions";
 
 export default async function AdminOrderDetailPage({
@@ -34,13 +33,10 @@ export default async function AdminOrderDetailPage({
     .createSignedUrl(order.slip_image_path, 300);
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-10">
-      <div className="flex items-center justify-between">
-        <Link href="/admin/orders" className="text-sm text-shop-text-soft hover:text-shop-blush-600">
-          ← กลับไปหน้ารายการ
-        </Link>
-        <AdminLogoutButton />
-      </div>
+    <div className="mx-auto max-w-2xl px-8 py-10">
+      <Link href="/admin/orders" className="text-sm text-shop-text-soft hover:text-shop-blush-600">
+        ← กลับไปหน้ารายการ
+      </Link>
 
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-shop-blush-100">
         <div className="flex items-start justify-between">
@@ -98,6 +94,7 @@ export default async function AdminOrderDetailPage({
                 width={400}
                 height={600}
                 unoptimized
+                priority
                 className="mt-2 max-h-96 w-auto rounded-xl border border-shop-blush-100 object-contain"
               />
             </a>

@@ -3,7 +3,6 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
-import AdminLogoutButton from "@/components/AdminLogoutButton";
 
 const TABS = [
   { status: "pending_verification", label: "รอตรวจสอบ" },
@@ -34,11 +33,8 @@ export default async function AdminOrdersPage({
   const { data: orders } = await query;
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-shop-text">จัดการคำสั่งซื้อ</h1>
-        <AdminLogoutButton />
-      </div>
+    <div className="mx-auto max-w-4xl px-8 py-10">
+      <h1 className="text-xl font-semibold text-shop-text">จัดการคำสั่งซื้อ</h1>
 
       <div className="mt-6 flex gap-2 rounded-full bg-shop-blush-50 p-1 text-sm font-medium">
         {TABS.map((tab) => (
