@@ -2,6 +2,7 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import ShopSettingsForm from "@/components/admin/ShopSettingsForm";
 import ReviewManager from "@/components/admin/ReviewManager";
+import type { HeroSlide } from "@/lib/shop-settings";
 
 // Supabase's inferred type for a to-one embed (via a unique FK) is an
 // array, but the actual response at runtime is a single object — handle
@@ -22,7 +23,7 @@ export default async function AdminSettingsPage() {
     supabase
       .from("shop_settings")
       .select(
-        "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_image_urls, hero_headline, reviews_section_enabled",
+        "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled",
       )
       .single(),
     supabase
@@ -42,8 +43,7 @@ export default async function AdminSettingsPage() {
             bankAccountName: settings?.bank_account_name ?? "",
             bankAccountNumber: settings?.bank_account_number ?? "",
             promptpayQrImageUrl: settings?.promptpay_qr_image_url ?? null,
-            heroImageUrls: settings?.hero_image_urls ?? [],
-            heroHeadline: settings?.hero_headline ?? "",
+            heroSlides: (settings?.hero_slides as HeroSlide[] | null) ?? [],
             reviewsSectionEnabled: settings?.reviews_section_enabled ?? false,
           }}
         />

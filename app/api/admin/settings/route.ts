@@ -3,13 +3,19 @@ import { z } from "zod";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 
+const heroSlideSchema = z.object({
+  imageUrl: z.string().min(1),
+  headline: z.string().trim(),
+  position: z.enum(["top", "center", "bottom"]),
+  overlay: z.enum(["light", "medium", "dark"]),
+});
+
 const schema = z.object({
   bankName: z.string().trim().nullable(),
   bankAccountName: z.string().trim().nullable(),
   bankAccountNumber: z.string().trim().nullable(),
   promptpayQrImageUrl: z.string().nullable(),
-  heroImageUrls: z.array(z.string()),
-  heroHeadline: z.string().trim().nullable(),
+  heroSlides: z.array(heroSlideSchema),
   reviewsSectionEnabled: z.boolean(),
 });
 
@@ -32,8 +38,7 @@ export async function PATCH(request: Request) {
       bank_account_name: body.data.bankAccountName || null,
       bank_account_number: body.data.bankAccountNumber || null,
       promptpay_qr_image_url: body.data.promptpayQrImageUrl,
-      hero_image_urls: body.data.heroImageUrls,
-      hero_headline: body.data.heroHeadline || null,
+      hero_slides: body.data.heroSlides,
       reviews_section_enabled: body.data.reviewsSectionEnabled,
       updated_at: new Date().toISOString(),
     })

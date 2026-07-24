@@ -2,44 +2,52 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import type { HeroSlide } from "@/lib/shop-settings";
 
 const HERO_HEIGHT_CLASSES =
   "relative h-[46vh] min-h-[300px] max-h-[520px] w-full sm:h-[52vh] sm:max-h-[600px]";
 
 const SLIDE_INTERVAL_MS = 4500;
 
-export default function HeroBanner({
-  images,
-  headline,
-}: {
-  images: string[];
-  headline: string | null;
-}) {
-  const title = headline || "แต่งตัวให้น่ารักทุกวัน";
+const POSITION_CLASSES: Record<HeroSlide["position"], string> = {
+  top: "justify-start pt-10 sm:pt-14",
+  center: "justify-center",
+  bottom: "justify-end pb-14 sm:pb-20",
+};
+
+const OVERLAY_CLASSES: Record<HeroSlide["overlay"], string> = {
+  light: "from-black/30 via-transparent to-transparent",
+  medium: "from-black/55 via-transparent to-transparent",
+  dark: "from-black/75 via-black/10 to-transparent",
+};
+
+export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const active = slides[activeIndex];
+  const title = active?.headline || "แต่งตัวให้น่ารักทุกวัน";
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (slides.length <= 1) return;
     const id = setInterval(() => {
-      setActiveIndex((i) => (i + 1) % images.length);
+      setActiveIndex((i) => (i + 1) % slides.length);
     }, SLIDE_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [images.length]);
+  }, [slides.length]);
 
   return (
     <section className="relative isolate overflow-hidden bg-shop-text">
       <div className={HERO_HEIGHT_CLASSES}>
-        {images.length > 0 ? (
-          images.map((src, index) => (
+        {slides.length > 0 ? (
+          slides.map((slide, index) => (
             <div
-              key={src}
+              key={slide.imageUrl}
               className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
                 index === activeIndex ? "opacity-100" : "opacity-0"
               }`}
             >
               {/* Blurred fill so the wide banner is never empty */}
               <Image
-                src={src}
+                src={slide.imageUrl}
                 alt=""
                 aria-hidden
                 fill
@@ -49,8 +57,8 @@ export default function HeroBanner({
               {/* Full photo, never cropped — photos are portrait (iPhone),
                   so this always shows the whole shot, heads included */}
               <Image
-                src={src}
-                alt={title}
+                src={slide.imageUrl}
+                alt={slide.headline || title}
                 fill
                 unoptimized
                 priority={index === 0}
@@ -62,9 +70,17 @@ export default function HeroBanner({
           <div className="absolute inset-0 bg-gradient-to-b from-shop-blush-100 via-shop-blush-50 to-shop-cream" />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${
+            OVERLAY_CLASSES[active?.overlay ?? "medium"]
+          }`}
+        />
 
-        <div className="absolute inset-0 flex flex-col items-center justify-end px-5 pb-14 text-center text-white sm:pb-20">
+        <div
+          className={`absolute inset-0 flex flex-col items-center px-5 text-center text-white ${
+            POSITION_CLASSES[active?.position ?? "bottom"]
+          }`}
+        >
           <p className="text-xs font-medium tracking-wide sm:text-sm">
             Casual &amp; Cuteness Everyday ☁️
           </p>
@@ -79,9 +95,9 @@ export default function HeroBanner({
           </a>
         </div>
 
-        {images.length > 1 && (
+        {slides.length > 1 && (
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
-            {images.map((_, index) => (
+            {slides.map((_, index) => (
               <button
                 key={index}
                 type="button"

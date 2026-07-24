@@ -44,7 +44,7 @@ export default async function Home({
 
     return (
       <>
-        <HeroBanner images={settings.heroImageUrls} headline={settings.heroHeadline} />
+        <HeroBanner slides={settings.heroSlides} />
 
         <section id="products" className="mx-auto max-w-6xl scroll-mt-32 px-5 py-14">
           <h2 className="text-2xl font-semibold text-shop-text">
@@ -77,7 +77,7 @@ export default async function Home({
 
     return (
       <>
-        <HeroBanner images={settings.heroImageUrls} headline={settings.heroHeadline} />
+        <HeroBanner slides={settings.heroSlides} />
 
         <section id="products" className="mx-auto max-w-6xl scroll-mt-32 px-5 py-14">
           <h2 className="text-2xl font-semibold text-shop-text">
@@ -106,7 +106,7 @@ export default async function Home({
 
   return (
     <>
-      <HeroBanner images={settings.heroImageUrls} headline={settings.heroHeadline} />
+      <HeroBanner slides={settings.heroSlides} />
 
       <div id="products" className="scroll-mt-32">
         <CategoryPreviewRow title="สินค้าใหม่" products={newProducts} />

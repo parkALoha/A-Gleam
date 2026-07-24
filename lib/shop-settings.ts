@@ -1,12 +1,21 @@
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
+export type HeroPosition = "top" | "center" | "bottom";
+export type HeroOverlay = "light" | "medium" | "dark";
+
+export type HeroSlide = {
+  imageUrl: string;
+  headline: string;
+  position: HeroPosition;
+  overlay: HeroOverlay;
+};
+
 export type ShopSettings = {
   bankName: string | null;
   bankAccountName: string | null;
   bankAccountNumber: string | null;
   promptpayQrImageUrl: string | null;
-  heroImageUrls: string[];
-  heroHeadline: string | null;
+  heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
 };
 
@@ -15,7 +24,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
   const { data, error } = await supabase
     .from("shop_settings")
     .select(
-      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_image_urls, hero_headline, reviews_section_enabled",
+      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled",
     )
     .single();
 
@@ -28,8 +37,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
     bankAccountName: data.bank_account_name,
     bankAccountNumber: data.bank_account_number,
     promptpayQrImageUrl: data.promptpay_qr_image_url,
-    heroImageUrls: data.hero_image_urls ?? [],
-    heroHeadline: data.hero_headline,
+    heroSlides: (data.hero_slides as HeroSlide[] | null) ?? [],
     reviewsSectionEnabled: data.reviews_section_enabled ?? false,
   };
 }

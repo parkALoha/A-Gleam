@@ -3,14 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
+import type { HeroSlide } from "@/lib/shop-settings";
+
+const POSITION_OPTIONS: { value: HeroSlide["position"]; label: string }[] = [
+  { value: "top", label: "บน" },
+  { value: "center", label: "กลาง" },
+  { value: "bottom", label: "ล่าง" },
+];
+
+const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
+  { value: "light", label: "อ่อน" },
+  { value: "medium", label: "กลาง" },
+  { value: "dark", label: "เข้ม" },
+];
 
 export type ShopSettingsValues = {
   bankName: string;
   bankAccountName: string;
   bankAccountNumber: string;
   promptpayQrImageUrl: string | null;
-  heroImageUrls: string[];
-  heroHeadline: string;
+  heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
 };
 
@@ -29,10 +41,37 @@ export default function ShopSettingsForm({
     setValues((v) => ({ ...v, [key]: value }));
   }
 
+  function addSlide() {
+    update("heroSlides", [
+      ...values.heroSlides,
+      { imageUrl: "", headline: "", position: "bottom", overlay: "medium" },
+    ]);
+  }
+
+  function updateSlide(index: number, patch: Partial<HeroSlide>) {
+    update(
+      "heroSlides",
+      values.heroSlides.map((s, i) => (i === index ? { ...s, ...patch } : s)),
+    );
+  }
+
+  function removeSlide(index: number) {
+    update(
+      "heroSlides",
+      values.heroSlides.filter((_, i) => i !== index),
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    if (values.heroSlides.some((s) => !s.imageUrl)) {
+      setError("กรุณาแนบรูปให้ครบทุกสไลด์ (หรือลบสไลด์ที่ยังไม่มีรูปออก)");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/settings", {
@@ -43,8 +82,7 @@ export default function ShopSettingsForm({
           bankAccountName: values.bankAccountName,
           bankAccountNumber: values.bankAccountNumber,
           promptpayQrImageUrl: values.promptpayQrImageUrl,
-          heroImageUrls: values.heroImageUrls,
-          heroHeadline: values.heroHeadline,
+          heroSlides: values.heroSlides,
           reviewsSectionEnabled: values.reviewsSectionEnabled,
         }),
       });
@@ -122,30 +160,96 @@ export default function ShopSettingsForm({
       </div>
 
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
-        <p className="font-medium text-shop-text">แบนเนอร์หน้าแรก (Hero)</p>
-
-        <div className="mt-4">
-          <label className="text-sm font-medium text-shop-text" htmlFor="hero_headline">
-            หัวข้อ
-          </label>
-          <input
-            id="hero_headline"
-            value={values.heroHeadline}
-            onChange={(e) => update("heroHeadline", e.target.value)}
-            placeholder="แต่งตัวให้น่ารักทุกวัน"
-            className={fieldClass}
-          />
+        <div className="flex items-center justify-between">
+          <p className="font-medium text-shop-text">แบนเนอร์หน้าแรก (Hero)</p>
+          <button
+            type="button"
+            onClick={addSlide}
+            className="rounded-full border border-shop-blush-200 px-4 py-1.5 text-sm font-medium text-shop-text hover:bg-shop-blush-50"
+          >
+            + เพิ่มสไลด์
+          </button>
         </div>
+        <p className="mt-1 text-xs text-shop-text-soft">
+          แต่ละสไลด์ตั้งข้อความ ตำแหน่งข้อความ และความเข้มของฉากหลังแยกกันได้ — ถ้ามีหลายสไลด์จะเลื่อนสลับกันเอง
+        </p>
 
-        <div className="mt-3">
-          <p className="text-sm font-medium text-shop-text">รูปแบนเนอร์ (เลื่อนได้หลายรูป)</p>
-          <div className="mt-1.5">
-            <ImageUploader
-              images={values.heroImageUrls}
-              onChange={(images) => update("heroImageUrls", images)}
-              multiple
-            />
-          </div>
+        {values.heroSlides.length === 0 && (
+          <p className="mt-3 text-sm text-shop-text-soft">
+            ยังไม่มีสไลด์ — กด &quot;+ เพิ่มสไลด์&quot;
+          </p>
+        )}
+
+        <div className="mt-3 space-y-4">
+          {values.heroSlides.map((slide, i) => (
+            <div key={i} className="rounded-xl border border-shop-blush-100 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-shop-text">สไลด์ที่ {i + 1}</p>
+                <button
+                  type="button"
+                  onClick={() => removeSlide(i)}
+                  className="text-xs font-medium text-red-500 hover:underline"
+                >
+                  ลบสไลด์นี้
+                </button>
+              </div>
+
+              <div className="mt-2">
+                <label className="text-xs text-shop-text-soft">รูปภาพ</label>
+                <div className="mt-1.5">
+                  <ImageUploader
+                    images={slide.imageUrl ? [slide.imageUrl] : []}
+                    onChange={(images) => updateSlide(i, { imageUrl: images[0] ?? "" })}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="text-xs text-shop-text-soft">ข้อความหัวข้อ</label>
+                <input
+                  value={slide.headline}
+                  onChange={(e) => updateSlide(i, { headline: e.target.value })}
+                  placeholder="แต่งตัวให้น่ารักทุกวัน"
+                  className={fieldClass}
+                />
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-shop-text-soft">ตำแหน่งข้อความ</label>
+                  <select
+                    value={slide.position}
+                    onChange={(e) =>
+                      updateSlide(i, { position: e.target.value as HeroSlide["position"] })
+                    }
+                    className={fieldClass}
+                  >
+                    {POSITION_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-shop-text-soft">ความเข้มฉากหลัง</label>
+                  <select
+                    value={slide.overlay}
+                    onChange={(e) =>
+                      updateSlide(i, { overlay: e.target.value as HeroSlide["overlay"] })
+                    }
+                    className={fieldClass}
+                  >
+                    {OVERLAY_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
