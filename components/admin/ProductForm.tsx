@@ -95,6 +95,54 @@ export default function ProductForm({
     );
   }
 
+  async function removeVariant(index: number) {
+    const variant = values.variants[index];
+    setError(null);
+
+    if (!variant.id) {
+      // Never saved to the DB — just drop it locally, no API call needed.
+      update(
+        "variants",
+        values.variants.filter((_, i) => i !== index),
+      );
+      return;
+    }
+
+    if (!confirm(`ลบสี "${variant.colorName}" ถาวร?`)) return;
+
+    const res = await fetch(`/api/admin/products/${values.id}/variants/${variant.id}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "ลบสีไม่สำเร็จ");
+      return;
+    }
+
+    update(
+      "variants",
+      values.variants.filter((_, i) => i !== index),
+    );
+  }
+
+  async function handleDeleteProduct() {
+    if (!confirm(`ลบสินค้า "${values.name}" ถาวร? ไม่สามารถย้อนกลับได้`)) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/products/${values.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "ลบสินค้าไม่สำเร็จ");
+        return;
+      }
+      router.push("/admin/products");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -352,6 +400,15 @@ export default function ProductForm({
         <div className="mt-3 space-y-4">
           {values.variants.map((variant, i) => (
             <div key={i} className="rounded-xl border border-shop-blush-100 p-4">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => removeVariant(i)}
+                  className="text-xs font-medium text-red-500 hover:underline"
+                >
+                  ลบสีนี้
+                </button>
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="text-xs text-shop-text-soft">ชื่อสี</label>
@@ -403,6 +460,17 @@ export default function ProductForm({
       >
         {submitting ? "กำลังบันทึก..." : isEditing ? "บันทึกการแก้ไข" : "สร้างสินค้า"}
       </button>
+
+      {isEditing && (
+        <button
+          type="button"
+          onClick={handleDeleteProduct}
+          disabled={submitting}
+          className="w-full rounded-full border border-red-200 px-8 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          ลบสินค้านี้ถาวร
+        </button>
+      )}
     </form>
   );
 }

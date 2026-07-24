@@ -95,3 +95,30 @@ export async function PATCH(
 
   return NextResponse.json({ id, slug: body.data.slug });
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const admin = await getAdminUser();
+  if (!admin) {
+    return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const supabase = createServiceClient();
+
+  const { error } = await supabase.from("products").delete().eq("id", id);
+
+  if (error) {
+    // FK violation (23503): a variant of this product is referenced by an
+    // old order_item, which blocks the cascade delete of product_variants.
+    const message =
+      error.code === "23503"
+        ? "ลบไม่ได้ เพราะมีคำสั่งซื้อเก่าอ้างอิงสินค้านี้อยู่ — ใช้ปุ่ม \"ซ่อน\" แทน"
+        : "ลบสินค้าไม่สำเร็จ";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  return NextResponse.json({ success: true });
+}
