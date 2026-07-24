@@ -39,12 +39,12 @@ export default async function AdminOrdersPage({
     <div className="mx-auto max-w-4xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">จัดการคำสั่งซื้อ</h1>
 
-      <div className="mt-6 -mx-8 flex gap-2 overflow-x-auto px-8 pb-1 text-sm font-medium">
+      <div className="mt-6 flex flex-wrap gap-2 text-sm font-medium">
         {TABS.map((tab) => (
           <Link
             key={tab.status}
             href={`/admin/orders?status=${tab.status}`}
-            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 transition-colors ${
+            className={`whitespace-nowrap rounded-full px-4 py-2 transition-colors ${
               activeStatus === tab.status
                 ? "bg-shop-blush-500 text-white shadow-sm"
                 : "bg-white text-shop-text-soft ring-1 ring-shop-blush-100 hover:bg-shop-blush-50"
