@@ -3,8 +3,20 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import AccountLogoutButton from "@/components/AccountLogoutButton";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import OrderStatusSummary from "@/components/OrderStatusSummary";
 
-export default async function AccountOrdersPage() {
+const CUSTOMER_SUMMARY_ITEMS = [
+  { status: "pending_verification", icon: "pending", label: "รอตรวจสอบ" },
+  { status: "confirmed", icon: "box", label: "รอจัดส่ง" },
+  { status: "shipped", icon: "truck", label: "ระหว่างจัดส่ง" },
+  { status: "delivered", icon: "check", label: "ได้รับแล้ว" },
+] as const;
+
+export default async function AccountOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -14,12 +26,25 @@ export default async function AccountOrdersPage() {
     redirect("/login");
   }
 
-  const { data: orders } = await supabase
+  const { status } = await searchParams;
+  const activeStatus = status ?? "all";
+
+  const { data: allOrders } = await supabase
     .from("orders")
     .select(
       "order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
     .order("created_at", { ascending: false });
+
+  const counts: Record<string, number> = {};
+  for (const order of allOrders ?? []) {
+    counts[order.status] = (counts[order.status] ?? 0) + 1;
+  }
+
+  const orders =
+    activeStatus === "all"
+      ? allOrders
+      : (allOrders ?? []).filter((o) => o.status === activeStatus);
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
@@ -28,6 +53,15 @@ export default async function AccountOrdersPage() {
           ประวัติคำสั่งซื้อ
         </h1>
         <AccountLogoutButton />
+      </div>
+
+      <div className="mt-6">
+        <OrderStatusSummary
+          title="การสั่งซื้อของฉัน"
+          baseHref="/account/orders"
+          items={[...CUSTOMER_SUMMARY_ITEMS]}
+          counts={counts}
+        />
       </div>
 
       {!orders || orders.length === 0 ? (
