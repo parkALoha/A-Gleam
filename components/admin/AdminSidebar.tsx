@@ -7,6 +7,7 @@ import AdminLogoutButton from "@/components/AdminLogoutButton";
 const NAV_ITEMS = [
   { href: "/admin", label: "แดชบอร์ด" },
   { href: "/admin/orders", label: "คำสั่งซื้อ" },
+  { href: "/admin/products", label: "สินค้า" },
 ];
 
 export default function AdminSidebar({ adminEmail }: { adminEmail: string }) {

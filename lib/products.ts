@@ -6,7 +6,7 @@ export type Measurements = {
   shoulder: number;
 };
 
-export type ProductTag = "ใหม่" | "ขายดี" | "ลดราคา";
+export type ProductTag = "ใหม่" | "ขายดี" | "ลดราคา" | "ตำหนิ";
 
 export type ProductVariant = {
   id: string;
