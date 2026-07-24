@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { isAllowedImageType } from "@/lib/image-validation";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -26,8 +27,8 @@ export default function ImageUploader({
 
     setError(null);
     for (const file of files) {
-      if (!file.type.startsWith("image/")) {
-        setError("กรุณาเลือกไฟล์รูปภาพ");
+      if (!isAllowedImageType(file.type)) {
+        setError("รองรับเฉพาะไฟล์ JPEG, PNG หรือ WebP");
         return;
       }
       if (file.size > MAX_SIZE) {
@@ -97,7 +98,7 @@ export default function ImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         multiple={multiple}
         onChange={handleFileChange}
         className="hidden"

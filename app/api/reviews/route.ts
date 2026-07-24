@@ -24,6 +24,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
   }
 
+  // The image must be a photo this customer actually uploaded to their own
+  // folder in the review-photos bucket — not an arbitrary external URL.
+  const expectedPrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/review-photos/${user.id}/`;
+  if (!body.data.imageUrl.startsWith(expectedPrefix)) {
+    return NextResponse.json({ error: "รูปภาพไม่ถูกต้อง" }, { status: 400 });
+  }
+
   const { data: order } = await supabase
     .from("orders")
     .select("id, customer_name, status")

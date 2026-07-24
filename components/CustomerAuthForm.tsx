@@ -30,29 +30,14 @@ export default function CustomerAuthForm() {
     setSubmitting(true);
 
     try {
-      let loginEmail = identifier.trim();
-      if (!loginEmail.includes("@")) {
-        const res = await fetch("/api/auth/resolve-phone", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: loginEmail }),
-        });
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-          setError(data?.error ?? "ไม่พบบัญชีนี้");
-          return;
-        }
-        loginEmail = data.email;
-      }
-
-      const supabase = createBrowserSupabaseClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim(), password: loginPassword }),
       });
-
-      if (signInError) {
-        setError("อีเมล/เบอร์โทร หรือรหัสผ่านไม่ถูกต้อง");
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(data?.error ?? "อีเมล/เบอร์โทร หรือรหัสผ่านไม่ถูกต้อง");
         return;
       }
 

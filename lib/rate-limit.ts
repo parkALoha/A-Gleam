@@ -23,5 +23,10 @@ export function checkRateLimit(key: string, limit: number, windowMs: number): bo
 }
 
 export function getClientIp(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  // Each proxy hop APPENDS its observed remote address to this header, so
+  // the first entry is whatever the client claims (spoofable) and the last
+  // entry is the one Vercel's edge network itself observed (trustworthy).
+  const chain = request.headers.get("x-forwarded-for");
+  const last = chain?.split(",").pop()?.trim();
+  return last || "unknown";
 }

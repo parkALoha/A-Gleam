@@ -52,7 +52,7 @@ export default function CreateAccountForm({
     const linkRes = await fetch("/api/account/link-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderNumber, phone, userId: data.user.id }),
+      body: JSON.stringify({ orderNumber, phone }),
     });
 
     if (!linkRes.ok) {

@@ -5,17 +5,35 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import PublishToggle from "@/components/admin/PublishToggle";
 import TagQuickSelect from "@/components/admin/TagQuickSelect";
+import Pagination from "@/components/admin/Pagination";
 
-export default async function AdminProductsPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await getAdminSession();
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   const supabase = createServiceClient();
-  const { data: products } = await supabase
+  const {
+    data: products,
+    count,
+  } = await supabase
     .from("products")
     .select(
       "id, slug, name, price, compare_at_price, tag, cover_image, is_published, product_variants(images, stock_quantity)",
+      { count: "exact" },
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -83,6 +101,8 @@ export default async function AdminProductsPage() {
           })}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} buildHref={(p) => `/admin/products?page=${p}`} />
     </div>
   );
 }

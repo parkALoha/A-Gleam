@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
@@ -99,6 +100,23 @@ export default function CheckoutForm({
     return null;
   }
 
+  if (items.length === 0) {
+    return (
+      <div className="mt-8 rounded-2xl bg-white p-8 text-center ring-1 ring-shop-blush-100">
+        <p className="font-medium text-shop-text">ตะกร้าว่างอยู่</p>
+        <p className="mt-1 text-sm text-shop-text-soft">
+          กลับไปเลือกสินค้าก่อนทำการชำระเงิน
+        </p>
+        <Link
+          href="/"
+          className="mt-5 inline-block rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-105"
+        >
+          เลือกซื้อสินค้า
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
       <div className="rounded-2xl bg-white p-5 ring-1 ring-shop-blush-100">
@@ -181,7 +199,7 @@ export default function CheckoutForm({
           id="slip"
           name="slip"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           required
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text file:mr-3 file:rounded-full file:border-0 file:bg-shop-blush-100 file:px-3 file:py-1.5 file:text-shop-blush-600"
         />

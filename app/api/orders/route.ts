@@ -3,6 +3,9 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { generateOrderNumber } from "@/lib/order-number";
+import { isAllowedImageType } from "@/lib/image-validation";
+import { fileTypeFromBuffer } from "file-type";
+import { buildOrderItems, type VariantWithProduct } from "@/lib/order-pricing";
 
 const orderFieldsSchema = z.object({
   customer_name: z.string().trim().min(1, "กรุณากรอกชื่อ-นามสกุล"),
@@ -61,9 +64,9 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (!slip.type.startsWith("image/")) {
+  if (!isAllowedImageType(slip.type)) {
     return NextResponse.json(
-      { error: "ไฟล์สลิปต้องเป็นรูปภาพ" },
+      { error: "ไฟล์สลิปต้องเป็นรูปภาพ JPEG, PNG หรือ WebP" },
       { status: 400 },
     );
   }
@@ -74,14 +77,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabase = createServiceClient();
+  // Don't trust the declared Content-Type alone — sniff the actual bytes so
+  // a file with a spoofed "image/*" header can't slip through as something
+  // else entirely.
+  const slipBuffer = Buffer.from(await slip.arrayBuffer());
+  const detectedType = await fileTypeFromBuffer(slipBuffer);
+  if (!detectedType || !isAllowedImageType(detectedType.mime)) {
+    return NextResponse.json(
+      { error: "ไฟล์สลิปต้องเป็นรูปภาพ JPEG, PNG หรือ WebP" },
+      { status: 400 },
+    );
+  }
 
-  type VariantWithProduct = {
-    id: string;
-    color_name: string;
-    stock_quantity: number;
-    products: { id: string; name: string; price: number } | null;
-  };
+  const supabase = createServiceClient();
 
   const variantIds = items.map((i) => i.variantId);
   const { data: variants, error: variantsError } = await supabase
@@ -99,43 +107,12 @@ export async function POST(request: Request) {
   const variantById = new Map(
     (variants as unknown as VariantWithProduct[]).map((v) => [v.id, v]),
   );
-  const orderItems: {
-    variant_id: string;
-    product_id: string;
-    product_name: string;
-    color_name: string;
-    unit_price: number;
-    quantity: number;
-  }[] = [];
-  let totalAmount = 0;
 
-  for (const item of items) {
-    const variant = variantById.get(item.variantId);
-    const product = variant?.products;
-    if (!variant || !product) {
-      return NextResponse.json(
-        { error: "สินค้าบางรายการไม่มีอยู่แล้ว กรุณารีเฟรชตะกร้า" },
-        { status: 400 },
-      );
-    }
-    if (variant.stock_quantity < item.quantity) {
-      return NextResponse.json(
-        {
-          error: `"${product.name} (${variant.color_name})" เหลือไม่พอ (คงเหลือ ${variant.stock_quantity} ชิ้น)`,
-        },
-        { status: 400 },
-      );
-    }
-    orderItems.push({
-      variant_id: variant.id,
-      product_id: product.id,
-      product_name: product.name,
-      color_name: variant.color_name,
-      unit_price: Number(product.price),
-      quantity: item.quantity,
-    });
-    totalAmount += Number(product.price) * item.quantity;
+  const result = buildOrderItems(items, variantById);
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 400 });
   }
+  const { orderItems, totalAmount } = result;
 
   const sessionClient = await createServerSupabaseClient();
   const {
@@ -144,12 +121,11 @@ export async function POST(request: Request) {
 
   const orderId = crypto.randomUUID();
   const orderNumber = generateOrderNumber();
-  const slipExt = slip.type.split("/")[1] || "jpg";
-  const slipPath = `${orderId}/slip.${slipExt}`;
+  const slipPath = `${orderId}/slip.${detectedType.ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("payment-slips")
-    .upload(slipPath, slip, { contentType: slip.type });
+    .upload(slipPath, slipBuffer, { contentType: detectedType.mime });
 
   if (uploadError) {
     return NextResponse.json(

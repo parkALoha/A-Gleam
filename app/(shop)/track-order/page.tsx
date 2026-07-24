@@ -14,29 +14,30 @@ type OrderResult = {
 };
 
 export default function TrackOrderPage() {
+  const [orderNumber, setOrderNumber] = useState("");
   const [phone, setPhone] = useState("");
-  const [orders, setOrders] = useState<OrderResult[] | null>(null);
+  const [order, setOrder] = useState<OrderResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setOrders(null);
+    setOrder(null);
     setLoading(true);
 
     try {
       const res = await fetch("/api/track-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ orderNumber, phone }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "เกิดข้อผิดพลาด");
         return;
       }
-      setOrders(data.orders);
+      setOrder(data.order);
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
@@ -50,13 +51,30 @@ export default function TrackOrderPage() {
         เช็คสถานะคำสั่งซื้อ
       </h1>
       <p className="mt-1 text-sm text-shop-text-soft">
-        กรอกเบอร์โทรที่ใช้ตอนสั่งซื้อ ระบบจะแสดงคำสั่งซื้อล่าสุดของเบอร์นี้ให้
+        กรอกเลขคำสั่งซื้อและเบอร์โทรที่ใช้ตอนสั่งซื้อ ระบบจะแสดงสถานะให้
       </p>
 
       <form
         onSubmit={handleSubmit}
         className="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100"
       >
+        <div>
+          <label className="text-sm font-medium text-shop-text" htmlFor="orderNumber">
+            เลขคำสั่งซื้อ
+          </label>
+          <input
+            id="orderNumber"
+            type="text"
+            required
+            value={orderNumber}
+            onChange={(e) => setOrderNumber(e.target.value)}
+            onInvalid={thaiInvalidMessage}
+            onInput={clearCustomValidity}
+            placeholder="AG-20260101-XXXX"
+            className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+          />
+        </div>
+
         <div>
           <label className="text-sm font-medium text-shop-text" htmlFor="phone">
             เบอร์โทร
@@ -84,52 +102,47 @@ export default function TrackOrderPage() {
         </button>
       </form>
 
-      {orders && (
+      {order && (
         <div className="mt-6 space-y-4">
-          {orders.map((order) => (
-            <div
-              key={order.orderNumber}
-              className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-shop-text">
-                    {order.orderNumber}
-                  </p>
-                  <p className="text-xs text-shop-text-soft">
-                    {new Date(order.createdAt).toLocaleDateString("th-TH", {
-                      dateStyle: "long",
-                    })}
-                  </p>
-                </div>
-                <span className="rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
-                  {order.statusLabel}
-                </span>
-              </div>
-
-              <ul className="mt-3 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
-                {order.items.map((item, i) => (
-                  <li key={i} className="flex justify-between">
-                    <span>
-                      {item.product_name} ({item.color_name}) × {item.quantity}
-                    </span>
-                    <span>{formatPrice(item.unit_price * item.quantity)}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-2 flex justify-between border-t border-shop-blush-100 pt-2 text-sm font-semibold text-shop-text">
-                <span>ยอดรวม</span>
-                <span className="text-shop-blush-600">
-                  {formatPrice(order.totalAmount)}
-                </span>
-              </div>
-              {order.trackingNumber && (
-                <p className="mt-2 text-xs text-shop-text-soft">
-                  เลขพัสดุ: {order.trackingNumber}
+          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="font-semibold text-shop-text">
+                  {order.orderNumber}
                 </p>
-              )}
+                <p className="text-xs text-shop-text-soft">
+                  {new Date(order.createdAt).toLocaleDateString("th-TH", {
+                    dateStyle: "long",
+                  })}
+                </p>
+              </div>
+              <span className="rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
+                {order.statusLabel}
+              </span>
             </div>
-          ))}
+
+            <ul className="mt-3 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
+              {order.items.map((item, i) => (
+                <li key={i} className="flex justify-between">
+                  <span>
+                    {item.product_name} ({item.color_name}) × {item.quantity}
+                  </span>
+                  <span>{formatPrice(item.unit_price * item.quantity)}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-2 flex justify-between border-t border-shop-blush-100 pt-2 text-sm font-semibold text-shop-text">
+              <span>ยอดรวม</span>
+              <span className="text-shop-blush-600">
+                {formatPrice(order.totalAmount)}
+              </span>
+            </div>
+            {order.trackingNumber && (
+              <p className="mt-2 text-xs text-shop-text-soft">
+                เลขพัสดุ: {order.trackingNumber}
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

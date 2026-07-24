@@ -3,6 +3,9 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import Pagination from "@/components/admin/Pagination";
+
+const PAGE_SIZE = 20;
 
 const TABS = [
   { status: "pending_verification", label: "รอตรวจสอบ" },
@@ -17,23 +20,30 @@ const TABS = [
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
   await getAdminSession();
-  const { status } = await searchParams;
+  const { status, page: pageParam } = await searchParams;
   const activeStatus = status ?? "pending_verification";
+  const page = Math.max(1, Number(pageParam) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   const supabase = createServiceClient();
   let query = supabase
     .from("orders")
-    .select("order_number, customer_name, customer_phone, total_amount, status, created_at")
-    .order("created_at", { ascending: false });
+    .select("order_number, customer_name, customer_phone, total_amount, status, created_at", {
+      count: "exact",
+    })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (activeStatus !== "all") {
     query = query.eq("status", activeStatus);
   }
 
-  const { data: orders } = await query;
+  const { data: orders, count } = await query;
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -89,6 +99,12 @@ export default async function AdminOrdersPage({
           ))}
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        buildHref={(p) => `/admin/orders?status=${activeStatus}&page=${p}`}
+      />
     </div>
   );
 }
