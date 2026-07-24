@@ -166,7 +166,7 @@ export default function ProfileForm({
 
       {success && showWelcome ? (
         <div className="rounded-xl bg-green-50 p-3 text-center">
-          <p className="text-sm text-green-600">บันทึกสำเร็จ ขอบคุณครับ</p>
+          <p className="text-sm text-green-600">บันทึกสำเร็จ</p>
           <Link
             href="/"
             className="mt-3 inline-block rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02]"

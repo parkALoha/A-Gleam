@@ -85,9 +85,15 @@ export default async function AdminOrderDetailPage({
         )}
 
         {order.tracking_number && (
-          <p className="mt-4 rounded-xl bg-shop-beige-100 p-3 text-xs text-shop-text-soft">
-            เลขพัสดุ: {order.tracking_number}
-          </p>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-shop-beige-100 p-3 text-xs text-shop-text-soft">
+            <span>เลขพัสดุ: {order.tracking_number}</span>
+            <Link
+              href={`/admin/orders/${order.order_number}/label`}
+              className="shrink-0 rounded-full border border-shop-blush-200 bg-white px-3 py-1 font-medium text-shop-text transition-colors hover:bg-shop-blush-50"
+            >
+              พิมพ์ label อีกครั้ง
+            </Link>
+          </div>
         )}
 
         <div className="mt-4 border-t border-shop-blush-100 pt-4">
