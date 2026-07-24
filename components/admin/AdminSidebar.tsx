@@ -14,11 +14,11 @@ export default function AdminSidebar({ adminEmail }: { adminEmail: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex shrink-0 flex-col border-b border-shop-blush-100 bg-white px-4 py-4 print:hidden md:w-56 md:border-b-0 md:border-r md:py-6">
+    <aside className="flex shrink-0 flex-col border-b border-shop-blush-100 bg-white px-4 py-4 print:hidden md:sticky md:top-0 md:h-screen md:w-56 md:overflow-y-auto md:border-b-0 md:border-r md:py-6">
       <div className="flex items-center justify-between md:block">
-        <p className="text-sm font-semibold tracking-wide text-shop-text">
+        <Link href="/admin" className="text-sm font-semibold tracking-wide text-shop-text hover:text-shop-blush-600">
           A GLEAM <span className="text-shop-blush-500">แอดมิน</span>
-        </p>
+        </Link>
         <div className="md:hidden">
           <AdminLogoutButton />
         </div>

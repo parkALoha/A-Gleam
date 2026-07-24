@@ -39,7 +39,7 @@ export default async function AdminOrdersPage({
     <div className="mx-auto max-w-4xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">จัดการคำสั่งซื้อ</h1>
 
-      <div className="mt-6 flex flex-wrap gap-2 text-sm font-medium">
+      <div className="sticky top-0 z-10 -mx-8 mt-6 flex flex-wrap gap-2 bg-shop-cream px-8 py-3 text-sm font-medium">
         {TABS.map((tab) => (
           <Link
             key={tab.status}
