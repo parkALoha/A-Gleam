@@ -17,6 +17,13 @@ const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
   { value: "dark", label: "เข้ม" },
 ];
 
+const CATEGORY_LINK_OPTIONS = [
+  { value: "/?tag=new#products", label: "สินค้าใหม่" },
+  { value: "/?tag=bestseller#products", label: "สินค้าขายดี" },
+  { value: "/?tag=sale#products", label: "SALE" },
+  { value: "/?tag=all#products", label: "สินค้าทั้งหมด" },
+];
+
 export type ShopSettingsValues = {
   bankName: string;
   bankAccountName: string;
@@ -28,8 +35,10 @@ export type ShopSettingsValues = {
 
 export default function ShopSettingsForm({
   initialValues,
+  products,
 }: {
   initialValues: ShopSettingsValues;
+  products: { slug: string; name: string }[];
 }) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
@@ -44,7 +53,7 @@ export default function ShopSettingsForm({
   function addSlide() {
     update("heroSlides", [
       ...values.heroSlides,
-      { imageUrl: "", headline: "", position: "bottom", overlay: "medium" },
+      { imageUrl: "", headline: "", position: "bottom", overlay: "medium", linkUrl: "" },
     ]);
   }
 
@@ -247,6 +256,35 @@ export default function ShopSettingsForm({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="text-xs text-shop-text-soft">
+                  ปุ่ม &quot;ช้อปเลย&quot; ไปที่
+                </label>
+                <select
+                  value={slide.linkUrl}
+                  onChange={(e) => updateSlide(i, { linkUrl: e.target.value })}
+                  className={fieldClass}
+                >
+                  <option value="">ค่าเริ่มต้น (เลื่อนไปหมวดสินค้า)</option>
+                  <optgroup label="หมวดหมู่">
+                    {CATEGORY_LINK_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {products.length > 0 && (
+                    <optgroup label="สินค้า">
+                      {products.map((p) => (
+                        <option key={p.slug} value={`/products/${p.slug}`}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
               </div>
             </div>
           ))}

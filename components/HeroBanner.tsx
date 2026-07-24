@@ -88,7 +88,7 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
             {title}
           </h1>
           <a
-            href="#products"
+            href={active?.linkUrl || "#products"}
             className="mt-5 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm transition-transform hover:scale-105"
           >
             ช้อปเลย

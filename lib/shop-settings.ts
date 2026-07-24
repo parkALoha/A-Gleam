@@ -8,6 +8,8 @@ export type HeroSlide = {
   headline: string;
   position: HeroPosition;
   overlay: HeroOverlay;
+  /** Where "ช้อปเลย" goes — empty means the default "#products" scroll. */
+  linkUrl: string;
 };
 
 export type ShopSettings = {
@@ -18,6 +20,18 @@ export type ShopSettings = {
   heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
 };
+
+// Rows saved before linkUrl existed won't have it in the stored jsonb —
+// default it so older slides don't crash on a missing field.
+export function normalizeHeroSlide(slide: Partial<HeroSlide>): HeroSlide {
+  return {
+    imageUrl: slide.imageUrl ?? "",
+    headline: slide.headline ?? "",
+    position: slide.position ?? "bottom",
+    overlay: slide.overlay ?? "medium",
+    linkUrl: slide.linkUrl ?? "",
+  };
+}
 
 export async function getShopSettings(): Promise<ShopSettings> {
   const supabase = createPublicSupabaseClient();
@@ -37,7 +51,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
     bankAccountName: data.bank_account_name,
     bankAccountNumber: data.bank_account_number,
     promptpayQrImageUrl: data.promptpay_qr_image_url,
-    heroSlides: (data.hero_slides as HeroSlide[] | null) ?? [],
+    heroSlides: ((data.hero_slides as Partial<HeroSlide>[] | null) ?? []).map(normalizeHeroSlide),
     reviewsSectionEnabled: data.reviews_section_enabled ?? false,
   };
 }

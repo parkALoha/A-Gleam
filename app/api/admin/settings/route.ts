@@ -8,6 +8,7 @@ const heroSlideSchema = z.object({
   headline: z.string().trim(),
   position: z.enum(["top", "center", "bottom"]),
   overlay: z.enum(["light", "medium", "dark"]),
+  linkUrl: z.string().trim(),
 });
 
 const schema = z.object({

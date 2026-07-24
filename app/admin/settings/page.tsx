@@ -2,7 +2,7 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import ShopSettingsForm from "@/components/admin/ShopSettingsForm";
 import ReviewManager from "@/components/admin/ReviewManager";
-import type { HeroSlide } from "@/lib/shop-settings";
+import { normalizeHeroSlide, type HeroSlide } from "@/lib/shop-settings";
 
 // Supabase's inferred type for a to-one embed (via a unique FK) is an
 // array, but the actual response at runtime is a single object — handle
@@ -19,7 +19,7 @@ export default async function AdminSettingsPage() {
   await getAdminSession();
 
   const supabase = createServiceClient();
-  const [{ data: settings }, { data: reviews }] = await Promise.all([
+  const [{ data: settings }, { data: reviews }, { data: products }] = await Promise.all([
     supabase
       .from("shop_settings")
       .select(
@@ -30,6 +30,11 @@ export default async function AdminSettingsPage() {
       .from("reviews")
       .select("id, customer_handle, image_url, caption, rating, is_visible, orders(order_number)")
       .order("sort_order", { ascending: true }),
+    supabase
+      .from("products")
+      .select("slug, name")
+      .eq("is_published", true)
+      .order("name", { ascending: true }),
   ]);
 
   return (
@@ -43,9 +48,12 @@ export default async function AdminSettingsPage() {
             bankAccountName: settings?.bank_account_name ?? "",
             bankAccountNumber: settings?.bank_account_number ?? "",
             promptpayQrImageUrl: settings?.promptpay_qr_image_url ?? null,
-            heroSlides: (settings?.hero_slides as HeroSlide[] | null) ?? [],
+            heroSlides: ((settings?.hero_slides as Partial<HeroSlide>[] | null) ?? []).map(
+              normalizeHeroSlide,
+            ),
             reviewsSectionEnabled: settings?.reviews_section_enabled ?? false,
           }}
+          products={products ?? []}
         />
       </div>
 
