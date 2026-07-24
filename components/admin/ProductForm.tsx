@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 import { useConfirm } from "@/components/admin/useConfirm";
+import Select from "@/components/ui/Select";
 
 const TAG_OPTIONS = [
   { value: "", label: "ไม่มีป้าย" },
@@ -281,21 +282,12 @@ export default function ProductForm({
         </div>
 
         <div className="mt-3">
-          <label className="text-sm font-medium text-shop-text" htmlFor="tag">
-            ป้ายสินค้า
-          </label>
-          <select
-            id="tag"
+          <label className="text-sm font-medium text-shop-text">ป้ายสินค้า</label>
+          <Select
             value={values.tag}
-            onChange={(e) => update("tag", e.target.value)}
-            className={fieldClass}
-          >
-            {TAG_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => update("tag", value)}
+            options={[...TAG_OPTIONS]}
+          />
         </div>
 
         <div className="mt-3">

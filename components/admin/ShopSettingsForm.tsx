@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
+import Select from "@/components/ui/Select";
 import type { HeroSlide } from "@/lib/shop-settings";
 
 const POSITION_OPTIONS: { value: HeroSlide["position"]; label: string }[] = [
@@ -226,35 +227,23 @@ export default function ShopSettingsForm({
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-shop-text-soft">ตำแหน่งข้อความ</label>
-                  <select
+                  <Select
                     value={slide.position}
-                    onChange={(e) =>
-                      updateSlide(i, { position: e.target.value as HeroSlide["position"] })
+                    onChange={(value) =>
+                      updateSlide(i, { position: value as HeroSlide["position"] })
                     }
-                    className={fieldClass}
-                  >
-                    {POSITION_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={POSITION_OPTIONS}
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-shop-text-soft">ความเข้มฉากหลัง</label>
-                  <select
+                  <Select
                     value={slide.overlay}
-                    onChange={(e) =>
-                      updateSlide(i, { overlay: e.target.value as HeroSlide["overlay"] })
+                    onChange={(value) =>
+                      updateSlide(i, { overlay: value as HeroSlide["overlay"] })
                     }
-                    className={fieldClass}
-                  >
-                    {OVERLAY_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={OVERLAY_OPTIONS}
+                  />
                 </div>
               </div>
 
@@ -262,29 +251,25 @@ export default function ShopSettingsForm({
                 <label className="text-xs text-shop-text-soft">
                   ปุ่ม &quot;ช้อปเลย&quot; ไปที่
                 </label>
-                <select
+                <Select
                   value={slide.linkUrl}
-                  onChange={(e) => updateSlide(i, { linkUrl: e.target.value })}
-                  className={fieldClass}
-                >
-                  <option value="">ค่าเริ่มต้น (เลื่อนไปหมวดสินค้า)</option>
-                  <optgroup label="หมวดหมู่">
-                    {CATEGORY_LINK_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  {products.length > 0 && (
-                    <optgroup label="สินค้า">
-                      {products.map((p) => (
-                        <option key={p.slug} value={`/products/${p.slug}`}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  )}
-                </select>
+                  onChange={(value) => updateSlide(i, { linkUrl: value })}
+                  options={[{ value: "", label: "ค่าเริ่มต้น (เลื่อนไปหมวดสินค้า)" }]}
+                  groups={[
+                    { label: "หมวดหมู่", options: CATEGORY_LINK_OPTIONS },
+                    ...(products.length > 0
+                      ? [
+                          {
+                            label: "สินค้า",
+                            options: products.map((p) => ({
+                              value: `/products/${p.slug}`,
+                              label: p.name,
+                            })),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
               </div>
             </div>
           ))}

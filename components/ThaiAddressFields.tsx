@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Select from "@/components/ui/Select";
 
 type Province = { id: string; name: string };
 type Amphure = { id: string; name: string; provinceId: string };
@@ -101,60 +102,54 @@ export default function ThaiAddressFields({
       <input type="hidden" name="subdistrict" value={subdistrictName} />
 
       <div>
-        <label className="text-sm font-medium text-shop-text">จังหวัด</label>
-        <select
+        <label className="text-sm font-medium text-shop-text" htmlFor="province_select">
+          จังหวัด
+        </label>
+        <Select
           id="province_select"
           required
           disabled={!loaded || readOnly}
           value={provinceId}
-          onChange={(e) => handleProvinceChange(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">{loaded ? "เลือกจังหวัด" : "กำลังโหลด..."}</option>
-          {provinces.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          onChange={handleProvinceChange}
+          options={[
+            { value: "", label: loaded ? "เลือกจังหวัด" : "กำลังโหลด..." },
+            ...provinces.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+        />
       </div>
 
       <div>
-        <label className="text-sm font-medium text-shop-text">อำเภอ/เขต</label>
-        <select
+        <label className="text-sm font-medium text-shop-text" htmlFor="district_select">
+          อำเภอ/เขต
+        </label>
+        <Select
           id="district_select"
           required
           disabled={!provinceId || readOnly}
           value={districtId}
-          onChange={(e) => handleDistrictChange(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">เลือกอำเภอ/เขต</option>
-          {districtOptions.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={handleDistrictChange}
+          options={[
+            { value: "", label: "เลือกอำเภอ/เขต" },
+            ...districtOptions.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
       </div>
 
       <div>
-        <label className="text-sm font-medium text-shop-text">ตำบล/แขวง</label>
-        <select
+        <label className="text-sm font-medium text-shop-text" htmlFor="subdistrict_select">
+          ตำบล/แขวง
+        </label>
+        <Select
           id="subdistrict_select"
           required
           disabled={!districtId || readOnly}
           value={subdistrictId}
-          onChange={(e) => handleSubdistrictChange(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">เลือกตำบล/แขวง</option>
-          {subdistrictOptions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+          onChange={handleSubdistrictChange}
+          options={[
+            { value: "", label: "เลือกตำบล/แขวง" },
+            ...subdistrictOptions.map((s) => ({ value: s.id, label: s.name })),
+          ]}
+        />
       </div>
 
       <div>

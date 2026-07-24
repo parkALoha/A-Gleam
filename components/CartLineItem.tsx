@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart, type CartItem } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
+import Select from "@/components/ui/Select";
 
 export type VariantOption = {
   id: string;
@@ -103,18 +104,16 @@ export default function CartLineItem({
           {hasColorPicker ? (
             <div className="flex items-center gap-2">
               <label className="text-xs text-shop-text-soft">สี</label>
-              <select
+              <Select
                 value={item.variantId}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="rounded-lg border border-shop-blush-100 bg-white px-2 py-1 text-sm text-shop-text outline-none focus:border-shop-blush-500"
-              >
-                {variants.map((v) => (
-                  <option key={v.id} value={v.id} disabled={!v.inStock}>
-                    {v.colorName}
-                    {!v.inStock ? " (หมด)" : ""}
-                  </option>
-                ))}
-              </select>
+                onChange={handleColorChange}
+                buttonClassName="flex items-center justify-between gap-2 rounded-lg border border-shop-blush-100 bg-white px-2 py-1 text-left text-sm text-shop-text outline-none focus:border-shop-blush-500"
+                options={variants.map((v) => ({
+                  value: v.id,
+                  label: `${v.colorName}${!v.inStock ? " (หมด)" : ""}`,
+                  disabled: !v.inStock,
+                }))}
+              />
             </div>
           ) : (
             <span />
