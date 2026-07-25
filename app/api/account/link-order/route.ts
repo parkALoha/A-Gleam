@@ -11,7 +11,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  if (!checkRateLimit(`link-order:${ip}`, 10, 15 * 60 * 1000)) {
+  if (!(await checkRateLimit(`link-order:${ip}`, 10, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
       { status: 429 },

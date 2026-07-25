@@ -17,7 +17,7 @@ const GENERIC_ERROR = "อีเมล/เบอร์โทร หรือร�
 // email directly was an account-enumeration / email-disclosure leak).
 export async function POST(request: Request) {
   const ip = getClientIp(request);
-  if (!checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
+  if (!(await checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000))) {
     return NextResponse.json(
       { error: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
       { status: 429 },
