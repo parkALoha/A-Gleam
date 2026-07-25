@@ -17,6 +17,13 @@ const schema = z.object({
   bankAccountName: z.string().trim().nullable(),
   bankAccountNumber: z.string().trim().nullable(),
   promptpayQrImageUrl: z.string().nullable(),
+  promptpayId: z
+    .string()
+    .trim()
+    .refine(
+      (v) => v === "" || /^\d{10}$/.test(v) || /^\d{13}$/.test(v),
+      "เลขพร้อมเพย์ต้องเป็นเบอร์โทร 10 หลัก หรือเลขบัตรประชาชน 13 หลัก",
+    ),
   heroSlides: z.array(heroSlideSchema),
   reviewsSectionEnabled: z.boolean(),
   slipVerificationMode: z.enum(["manual", "semi_auto", "auto_confirm"]),
@@ -42,6 +49,7 @@ export async function PATCH(request: Request) {
       bank_account_name: body.data.bankAccountName || null,
       bank_account_number: body.data.bankAccountNumber || null,
       promptpay_qr_image_url: body.data.promptpayQrImageUrl,
+      promptpay_id: body.data.promptpayId || null,
       hero_slides: body.data.heroSlides,
       reviews_section_enabled: body.data.reviewsSectionEnabled,
       slip_verification_mode: body.data.slipVerificationMode,

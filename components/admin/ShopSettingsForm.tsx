@@ -40,6 +40,7 @@ export type ShopSettingsValues = {
   bankCode: string;
   bankAccountName: string;
   bankAccountNumber: string;
+  promptpayId: string;
   promptpayQrImageUrl: string | null;
   heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
@@ -104,6 +105,7 @@ export default function ShopSettingsForm({
           bankCode: values.bankCode,
           bankAccountName: values.bankAccountName,
           bankAccountNumber: values.bankAccountNumber,
+          promptpayId: values.promptpayId,
           promptpayQrImageUrl: values.promptpayQrImageUrl,
           heroSlides: values.heroSlides,
           reviewsSectionEnabled: values.reviewsSectionEnabled,
@@ -176,7 +178,25 @@ export default function ShopSettingsForm({
         </div>
 
         <div className="mt-3">
-          <p className="text-sm font-medium text-shop-text">รูป QR พร้อมเพย์</p>
+          <label className="text-sm font-medium text-shop-text" htmlFor="promptpay_id">
+            เลขพร้อมเพย์ (เบอร์โทร หรือเลขบัตรประชาชน)
+          </label>
+          <input
+            id="promptpay_id"
+            value={values.promptpayId}
+            onChange={(e) => update("promptpayId", e.target.value)}
+            placeholder="0812345678"
+            className={fieldClass}
+          />
+          <p className="mt-1 text-xs text-shop-text-soft">
+            ใส่แล้วระบบจะสร้าง QR ใหม่ให้ตรงยอดทุกออเดอร์อัตโนมัติ ไม่ต้องใช้รูป QR ด้านล่าง
+          </p>
+        </div>
+
+        <div className="mt-3">
+          <p className="text-sm font-medium text-shop-text">
+            รูป QR พร้อมเพย์ (ใช้เมื่อไม่ได้ใส่เลขพร้อมเพย์ด้านบน)
+          </p>
           <div className="mt-1.5">
             <ImageUploader
               images={values.promptpayQrImageUrl ? [values.promptpayQrImageUrl] : []}

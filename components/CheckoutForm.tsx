@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
 import { PHONE_PATTERN } from "@/lib/form-validation";
+import PromptPayQr from "@/components/PromptPayQr";
+import type { ShopSettings } from "@/lib/shop-settings";
 
 type CheckoutDefaultValues = {
   customer_name: string;
@@ -20,8 +23,10 @@ type CheckoutDefaultValues = {
 
 export default function CheckoutForm({
   defaultValues,
+  settings,
 }: {
   defaultValues?: CheckoutDefaultValues;
+  settings: ShopSettings;
 }) {
   const router = useRouter();
   const { items, totalPrice, clearCart, hydrated } = useCart();
@@ -135,6 +140,48 @@ export default function CheckoutForm({
         <div className="mt-3 flex justify-between border-t border-shop-blush-100 pt-3 font-semibold text-shop-text">
           <span>ยอดรวม</span>
           <span className="text-shop-blush-600">{formatPrice(totalPrice)}</span>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-shop-beige-100 p-5">
+        <p className="text-sm font-medium text-shop-text">
+          โอนเงินตามยอดที่ต้องชำระ แล้วแนบรูปสลิปด้านล่าง
+        </p>
+        <div className="mt-4 grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+          {settings.promptpayId ? (
+            <div className="mx-auto sm:mx-0">
+              <PromptPayQr promptPayId={settings.promptpayId} amount={totalPrice} />
+            </div>
+          ) : (
+            settings.promptpayQrImageUrl && (
+              <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-xl bg-white sm:mx-0">
+                <Image
+                  src={settings.promptpayQrImageUrl}
+                  alt="QR พร้อมเพย์"
+                  fill
+                  unoptimized
+                  className="object-contain p-2"
+                />
+              </div>
+            )
+          )}
+          <div className="text-sm text-shop-text-soft">
+            {settings.bankName && (
+              <p>
+                <span className="text-shop-text">ธนาคาร:</span> {settings.bankName}
+              </p>
+            )}
+            {settings.bankAccountName && (
+              <p>
+                <span className="text-shop-text">ชื่อบัญชี:</span> {settings.bankAccountName}
+              </p>
+            )}
+            {settings.bankAccountNumber && (
+              <p>
+                <span className="text-shop-text">เลขบัญชี:</span> {settings.bankAccountNumber}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

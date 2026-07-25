@@ -17,6 +17,7 @@ export type ShopSettings = {
   bankAccountName: string | null;
   bankAccountNumber: string | null;
   promptpayQrImageUrl: string | null;
+  promptpayId: string | null;
   heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
 };
@@ -38,7 +39,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
   const { data, error } = await supabase
     .from("shop_settings")
     .select(
-      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled",
+      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, promptpay_id, hero_slides, reviews_section_enabled",
     )
     .single();
 
@@ -51,6 +52,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
     bankAccountName: data.bank_account_name,
     bankAccountNumber: data.bank_account_number,
     promptpayQrImageUrl: data.promptpay_qr_image_url,
+    promptpayId: data.promptpay_id,
     heroSlides: ((data.hero_slides as Partial<HeroSlide>[] | null) ?? []).map(normalizeHeroSlide),
     reviewsSectionEnabled: data.reviews_section_enabled ?? false,
   };
