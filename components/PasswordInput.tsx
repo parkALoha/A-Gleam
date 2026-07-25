@@ -36,6 +36,7 @@ export default function PasswordInput({
       />
       <button
         type="button"
+        tabIndex={-1}
         onClick={() => setVisible((v) => !v)}
         aria-label={visible ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
         className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-shop-text-soft hover:text-shop-blush-600"
