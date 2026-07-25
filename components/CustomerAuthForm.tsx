@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export default function CustomerAuthForm() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function CustomerAuthForm() {
         return;
       }
 
-      router.push("/account/orders");
+      router.push(data?.isAdmin ? "/admin" : "/account/orders");
       router.refresh();
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -73,7 +74,7 @@ export default function CustomerAuthForm() {
       });
 
       if (signUpError) {
-        setError(signUpError.message);
+        setError(translateAuthError(signUpError));
         return;
       }
 

@@ -21,3 +21,20 @@ export function thaiInvalidMessage(e: React.InvalidEvent<Validatable>) {
 export function clearCustomValidity(e: React.FormEvent<Validatable>) {
   e.currentTarget.setCustomValidity("");
 }
+
+export const PHONE_PATTERN = "[0-9]{10}";
+
+// Same as thaiInvalidMessage, but with a phone-specific message instead of
+// the generic "รูปแบบข้อมูลไม่ถูกต้อง" for a pattern mismatch.
+export function phoneInvalidMessage(e: React.InvalidEvent<Validatable>) {
+  const el = e.currentTarget;
+  const validity = el.validity;
+
+  if (validity.valueMissing) {
+    el.setCustomValidity("กรุณากรอกเบอร์โทร");
+  } else if (validity.patternMismatch || validity.tooShort || validity.tooLong) {
+    el.setCustomValidity("เบอร์โทรต้องเป็นตัวเลข 10 หลัก");
+  } else {
+    el.setCustomValidity("กรุณากรอกข้อมูลให้ถูกต้อง");
+  }
+}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
+import { PHONE_PATTERN } from "@/lib/form-validation";
 
 type CheckoutDefaultValues = {
   customer_name: string;
@@ -35,7 +36,7 @@ export default function CheckoutForm({
 
     const requiredFields: { id: string; message: string }[] = [
       { id: "customer_name", message: "กรุณากรอกชื่อ-นามสกุล" },
-      { id: "customer_phone", message: "กรุณากรอกเบอร์โทรศัพท์" },
+      { id: "customer_phone", message: "กรุณากรอกเบอร์โทร 10 หลักให้ถูกต้อง" },
       { id: "address_line", message: "กรุณากรอกที่อยู่ (บ้านเลขที่ / ถนน / หมู่บ้าน)" },
       { id: "province_select", message: "กรุณาเลือกจังหวัด" },
       { id: "district_select", message: "กรุณาเลือกอำเภอ/เขต" },
@@ -158,6 +159,9 @@ export default function CheckoutForm({
           id="customer_phone"
           name="customer_phone"
           type="tel"
+          inputMode="numeric"
+          pattern={PHONE_PATTERN}
+          maxLength={10}
           required
           defaultValue={defaultValues?.customer_phone}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"

@@ -13,14 +13,16 @@ export default async function Header() {
 
   let avatarUrl: string | null = null;
   let fallbackLabel = "";
+  let isAdmin = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("avatar_url, full_name")
+      .select("avatar_url, full_name, is_admin")
       .eq("id", user.id)
       .maybeSingle();
     avatarUrl = profile?.avatar_url ?? null;
     fallbackLabel = profile?.full_name || user.email || "";
+    isAdmin = profile?.is_admin ?? false;
   }
 
   return (
@@ -44,7 +46,7 @@ export default async function Header() {
           <div className="flex w-12 items-center justify-end gap-1.5 sm:w-32 sm:gap-4">
             <SearchOverlay />
             {user ? (
-              <AccountMenu avatarUrl={avatarUrl} fallbackLabel={fallbackLabel} />
+              <AccountMenu avatarUrl={avatarUrl} fallbackLabel={fallbackLabel} isAdmin={isAdmin} />
             ) : (
               <Link
                 href="/login"

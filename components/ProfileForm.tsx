@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ThaiAddressFields from "@/components/ThaiAddressFields";
+import { PHONE_PATTERN } from "@/lib/form-validation";
 
 type ProfileValues = {
   full_name: string;
@@ -40,6 +41,7 @@ export default function ProfileForm({
     const form = e.currentTarget;
 
     const requiredFields = [
+      { id: "phone", message: "เบอร์โทรต้องเป็นตัวเลข 10 หลัก" },
       { id: "province_select", message: "กรุณาเลือกจังหวัด" },
       { id: "district_select", message: "กรุณาเลือกอำเภอ/เขต" },
       { id: "subdistrict_select", message: "กรุณาเลือกตำบล/แขวง" },
@@ -127,6 +129,9 @@ export default function ProfileForm({
         <input
           id="phone"
           type="tel"
+          inputMode="numeric"
+          pattern={PHONE_PATTERN}
+          maxLength={10}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           disabled={!editing}

@@ -9,9 +9,11 @@ import AvatarBadge from "@/components/AvatarBadge";
 export default function AccountMenu({
   avatarUrl,
   fallbackLabel,
+  isAdmin,
 }: {
   avatarUrl: string | null;
   fallbackLabel: string;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,6 +51,18 @@ export default function AccountMenu({
 
       {open && (
         <div className="absolute right-0 top-full z-20 mt-2 w-44 rounded-xl bg-white py-1.5 text-sm text-shop-text shadow-lg ring-1 ring-shop-blush-100">
+          {isAdmin && (
+            <>
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 font-medium text-shop-blush-600 hover:bg-shop-blush-50"
+              >
+                ไปหน้าแอดมิน
+              </Link>
+              <div className="my-1 border-t border-shop-blush-100" />
+            </>
+          )}
           <Link
             href="/account/orders"
             onClick={() => setOpen(false)}

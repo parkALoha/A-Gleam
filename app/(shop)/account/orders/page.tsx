@@ -30,11 +30,15 @@ export default async function AccountOrdersPage({
   const { status } = await searchParams;
   const activeStatus = status ?? "all";
 
+  // Explicit filter, not just reliance on RLS — an admin viewer also
+  // matches the "admin read orders" RLS policy, which would otherwise
+  // surface every order in the shop on what's supposed to be "my orders".
   const { data: allOrders } = await supabase
     .from("orders")
     .select(
       "id, order_number, status, total_amount, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
     )
+    .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
 
   const { data: myReviews } = await supabase

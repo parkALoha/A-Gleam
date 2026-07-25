@@ -9,7 +9,7 @@ import { buildOrderItems, type VariantWithProduct } from "@/lib/order-pricing";
 
 const orderFieldsSchema = z.object({
   customer_name: z.string().trim().min(1, "กรุณากรอกชื่อ-นามสกุล"),
-  customer_phone: z.string().trim().min(1, "กรุณากรอกเบอร์โทร"),
+  customer_phone: z.string().trim().regex(/^\d{10}$/, "เบอร์โทรต้องเป็นตัวเลข 10 หลัก"),
   address_line: z.string().trim().min(1, "กรุณากรอกที่อยู่"),
   subdistrict: z.string().trim().min(1, "กรุณาเลือกตำบล/แขวง"),
   district: z.string().trim().min(1, "กรุณาเลือกอำเภอ/เขต"),

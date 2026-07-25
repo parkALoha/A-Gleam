@@ -5,7 +5,11 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 const schema = z.object({
   full_name: z.string().trim().optional(),
-  phone: z.string().trim().optional(),
+  phone: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^\d{10}$/.test(v), "เบอร์โทรต้องเป็นตัวเลข 10 หลัก")
+    .optional(),
   address_line: z.string().trim().optional(),
   subdistrict: z.string().trim().optional(),
   district: z.string().trim().optional(),

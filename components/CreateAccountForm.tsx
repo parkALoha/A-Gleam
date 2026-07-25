@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
+import { translateAuthError } from "@/lib/auth-errors";
 
 export default function CreateAccountForm({
   orderNumber,
@@ -44,7 +45,7 @@ export default function CreateAccountForm({
     });
 
     if (signUpError || !data.user) {
-      setError(signUpError?.message ?? "สมัครไม่สำเร็จ ลองใหม่อีกครั้ง");
+      setError(signUpError ? translateAuthError(signUpError) : "สมัครไม่สำเร็จ ลองใหม่อีกครั้ง");
       setSubmitting(false);
       return;
     }

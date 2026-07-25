@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: signInData, error } = await supabase.auth.signInWithPassword({
     email: loginEmail,
     password: body.data.password,
   });
@@ -59,5 +59,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 401 });
   }
 
-  return NextResponse.json({ success: true });
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", signInData.user.id)
+    .maybeSingle();
+
+  return NextResponse.json({ success: true, isAdmin: profile?.is_admin ?? false });
 }

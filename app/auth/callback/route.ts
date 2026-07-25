@@ -52,9 +52,13 @@ export async function GET(request: Request) {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("phone")
+        .select("phone, is_admin")
         .eq("id", data.user.id)
         .maybeSingle();
+
+      if (profile?.is_admin) {
+        return NextResponse.redirect(`${origin}/admin`);
+      }
 
       // First time in from a social login with no phone on file yet — ask
       // for it once so we can find/link any past guest orders by phone.
