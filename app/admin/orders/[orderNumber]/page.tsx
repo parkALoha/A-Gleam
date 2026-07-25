@@ -19,7 +19,7 @@ export default async function AdminOrderDetailPage({
   const { data: order } = await supabase
     .from("orders")
     .select(
-      "order_number, customer_name, customer_phone, address_line, subdistrict, district, province, postal_code, total_amount, slip_image_path, status, admin_note, tracking_number, created_at, order_items(product_name, color_name, unit_price, quantity)",
+      "order_number, customer_name, customer_phone, address_line, subdistrict, district, province, postal_code, total_amount, slip_image_path, status, admin_note, tracking_number, created_at, slip_verification_status, slip_verification_result, order_items(product_name, color_name, unit_price, quantity)",
     )
     .eq("order_number", orderNumber)
     .maybeSingle();
@@ -27,6 +27,10 @@ export default async function AdminOrderDetailPage({
   if (!order) {
     notFound();
   }
+
+  const detectedAmount = (
+    order.slip_verification_result as { data?: { amount?: unknown } } | null
+  )?.data?.amount;
 
   const { data: signedSlip } = await supabase.storage
     .from("payment-slips")
@@ -97,7 +101,31 @@ export default async function AdminOrderDetailPage({
         )}
 
         <div className="mt-4 border-t border-shop-blush-100 pt-4">
-          <p className="text-sm font-medium text-shop-text">สลิปโอนเงิน</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-shop-text">สลิปโอนเงิน</p>
+            {order.slip_verification_status === "verified" && (
+              <span className="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-600">
+                ✓ ยอดตรงกัน (ตรวจอัตโนมัติ)
+              </span>
+            )}
+            {order.slip_verification_status === "amount_mismatch" && (
+              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-600">
+                ⚠ ยอดไม่ตรง — สลิปแสดง{" "}
+                {typeof detectedAmount === "number" ? formatPrice(detectedAmount) : "ไม่ทราบยอด"}{" "}
+                แต่ออเดอร์นี้ {formatPrice(order.total_amount)}
+              </span>
+            )}
+            {order.slip_verification_status === "fraud" && (
+              <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600">
+                ⚠ ระบบตรวจไม่พบสลิปที่ถูกต้องในรูปนี้
+              </span>
+            )}
+            {order.slip_verification_status === "error" && (
+              <span className="rounded-full bg-shop-beige-100 px-2.5 py-0.5 text-xs font-medium text-shop-text-soft">
+                ตรวจสอบอัตโนมัติไม่สำเร็จ กรุณาดูด้วยตา
+              </span>
+            )}
+          </div>
           {signedSlip?.signedUrl ? (
             <a href={signedSlip.signedUrl} target="_blank" rel="noopener noreferrer">
               <Image

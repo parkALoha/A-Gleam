@@ -25,6 +25,15 @@ const CATEGORY_LINK_OPTIONS = [
   { value: "/?tag=all#products", label: "สินค้าทั้งหมด" },
 ];
 
+const SLIP_VERIFICATION_OPTIONS: {
+  value: "manual" | "semi_auto" | "auto_confirm";
+  label: string;
+}[] = [
+  { value: "manual", label: "Manual — แอดมินดูสลิปเองล้วนๆ" },
+  { value: "semi_auto", label: "Semi-auto — ระบบตรวจให้ก่อน แต่แอดมินยังต้องกดยืนยันเอง (แนะนำ)" },
+  { value: "auto_confirm", label: "Auto-confirm — ยอดตรงและไม่ซ้ำ ระบบยืนยันให้ทันที" },
+];
+
 export type ShopSettingsValues = {
   bankName: string;
   bankAccountName: string;
@@ -32,6 +41,7 @@ export type ShopSettingsValues = {
   promptpayQrImageUrl: string | null;
   heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
+  slipVerificationMode: "manual" | "semi_auto" | "auto_confirm";
 };
 
 export default function ShopSettingsForm({
@@ -94,6 +104,7 @@ export default function ShopSettingsForm({
           promptpayQrImageUrl: values.promptpayQrImageUrl,
           heroSlides: values.heroSlides,
           reviewsSectionEnabled: values.reviewsSectionEnabled,
+          slipVerificationMode: values.slipVerificationMode,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -166,6 +177,23 @@ export default function ShopSettingsForm({
               onChange={(images) => update("promptpayQrImageUrl", images[0] ?? null)}
             />
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
+        <p className="font-medium text-shop-text">ตรวจสอบสลิปอัตโนมัติ (Slip2Go)</p>
+        <p className="mt-1 text-xs text-shop-text-soft">
+          เลือกว่าจะให้ระบบช่วยตรวจยอดเงินในสลิปแค่ไหน — สต็อกจะถูกตัดก็ต่อเมื่อออเดอร์ถูกยืนยันแล้วเท่านั้น
+          ไม่ว่าจะยืนยันเองหรือระบบยืนยันให้อัตโนมัติ
+        </p>
+        <div className="mt-3">
+          <Select
+            value={values.slipVerificationMode}
+            onChange={(value) =>
+              update("slipVerificationMode", value as ShopSettingsValues["slipVerificationMode"])
+            }
+            options={SLIP_VERIFICATION_OPTIONS}
+          />
         </div>
       </div>
 

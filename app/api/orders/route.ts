@@ -6,6 +6,7 @@ import { generateOrderNumber } from "@/lib/order-number";
 import { isAllowedImageType } from "@/lib/image-validation";
 import { fileTypeFromBuffer } from "file-type";
 import { buildOrderItems, type VariantWithProduct } from "@/lib/order-pricing";
+import { verifySlip } from "@/lib/slip2go";
 
 const orderFieldsSchema = z.object({
   customer_name: z.string().trim().min(1, "กรุณากรอกชื่อ-นามสกุล"),
@@ -123,9 +124,20 @@ export async function POST(request: Request) {
   const orderNumber = generateOrderNumber();
   const slipPath = `${orderId}/slip.${detectedType.ext}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from("payment-slips")
-    .upload(slipPath, slipBuffer, { contentType: detectedType.mime });
+  const { data: settings } = await supabase
+    .from("shop_settings")
+    .select("slip_verification_mode")
+    .single();
+  const verificationMode = settings?.slip_verification_mode ?? "manual";
+
+  const [{ error: uploadError }, verification] = await Promise.all([
+    supabase.storage
+      .from("payment-slips")
+      .upload(slipPath, slipBuffer, { contentType: detectedType.mime }),
+    verificationMode === "manual"
+      ? Promise.resolve(null)
+      : verifySlip(slipBuffer, detectedType.mime, totalAmount),
+  ]);
 
   if (uploadError) {
     return NextResponse.json(
@@ -148,6 +160,8 @@ export async function POST(request: Request) {
     slip_image_path: slipPath,
     status: "pending_verification",
     customer_id: loggedInCustomer?.id ?? null,
+    slip_verification_status: verification?.status ?? null,
+    slip_verification_result: verification?.raw ?? null,
   });
 
   if (orderError) {
@@ -167,6 +181,13 @@ export async function POST(request: Request) {
       { error: "บันทึกรายการสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง" },
       { status: 500 },
     );
+  }
+
+  // Only auto-confirm on a confident, independently-checked match — any
+  // ambiguity (error, mismatch, fraud flag) always falls back to the normal
+  // manual-review queue instead of guessing.
+  if (verificationMode === "auto_confirm" && verification?.status === "verified") {
+    await supabase.rpc("confirm_order", { p_order_id: orderId });
   }
 
   return NextResponse.json({ orderNumber }, { status: 201 });

@@ -23,7 +23,7 @@ export default async function AdminSettingsPage() {
     supabase
       .from("shop_settings")
       .select(
-        "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled",
+        "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled, slip_verification_mode",
       )
       .single(),
     supabase
@@ -52,6 +52,12 @@ export default async function AdminSettingsPage() {
               normalizeHeroSlide,
             ),
             reviewsSectionEnabled: settings?.reviews_section_enabled ?? false,
+            slipVerificationMode:
+              (settings?.slip_verification_mode as
+                | "manual"
+                | "semi_auto"
+                | "auto_confirm"
+                | undefined) ?? "manual",
           }}
           products={products ?? []}
         />

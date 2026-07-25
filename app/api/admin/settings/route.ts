@@ -18,6 +18,7 @@ const schema = z.object({
   promptpayQrImageUrl: z.string().nullable(),
   heroSlides: z.array(heroSlideSchema),
   reviewsSectionEnabled: z.boolean(),
+  slipVerificationMode: z.enum(["manual", "semi_auto", "auto_confirm"]),
 });
 
 export async function PATCH(request: Request) {
@@ -41,6 +42,7 @@ export async function PATCH(request: Request) {
       promptpay_qr_image_url: body.data.promptpayQrImageUrl,
       hero_slides: body.data.heroSlides,
       reviews_section_enabled: body.data.reviewsSectionEnabled,
+      slip_verification_mode: body.data.slipVerificationMode,
       updated_at: new Date().toISOString(),
     })
     .eq("id", true);
