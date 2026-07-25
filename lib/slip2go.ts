@@ -7,7 +7,19 @@ export type SlipVerificationResult = {
   raw: unknown;
 };
 
+export type ReceiverConfig = {
+  bankCode: string;
+  accountNumber: string;
+  accountNameTH: string;
+};
+
 const ENDPOINT = "https://connect.slip2go.com/api/verify-slip/qr-image/info";
+
+// Slip2Go's checkReceiver wants the name without a Thai honorific title.
+const THAI_TITLE_PREFIX = /^(นาย|นาง|นางสาว|น\.ส\.|บริษัท|ห้างหุ้นส่วนจำกัด|หจก\.)\s*/;
+function stripThaiTitle(name: string): string {
+  return name.replace(THAI_TITLE_PREFIX, "").trim();
+}
 
 /**
  * Calls Slip2Go's slip-verification API and classifies the result.
@@ -18,11 +30,20 @@ const ENDPOINT = "https://connect.slip2go.com/api/verify-slip/qr-image/info";
  * ourselves rather than relying on an unverified pass/fail flag in their
  * response. Anything that doesn't fit one of those shapes comes back as
  * "error" so the caller falls back to manual review instead of guessing.
+ *
+ * `receiver`, when given, is sent as checkReceiver so Slip2Go also checks
+ * the money landed in the shop's own account — but we don't yet have a
+ * confirmed field/code for how a receiver mismatch shows up in the
+ * response (no real slip was available to test against), so a mismatch
+ * there most likely surfaces as a non-standard response and falls through
+ * to "error" (safe: it just means manual review instead of a specific
+ * "wrong account" label).
  */
 export async function verifySlip(
   imageBuffer: Buffer,
   mimeType: string,
   expectedAmount: number,
+  receiver?: ReceiverConfig,
 ): Promise<SlipVerificationResult> {
   const secretKey = process.env.SLIP2GO_SECRET_KEY;
   if (!secretKey) {
@@ -41,6 +62,17 @@ export async function verifySlip(
       JSON.stringify({
         checkAmount: { type: "eq", amount: expectedAmount },
         checkDuplicate: true,
+        ...(receiver
+          ? {
+              checkReceiver: [
+                {
+                  accountType: receiver.bankCode,
+                  accountNumber: receiver.accountNumber,
+                  accountNameTH: stripThaiTitle(receiver.accountNameTH),
+                },
+              ],
+            }
+          : {}),
       }),
     );
 

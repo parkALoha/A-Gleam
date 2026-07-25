@@ -23,7 +23,7 @@ export default async function AdminSettingsPage() {
     supabase
       .from("shop_settings")
       .select(
-        "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled, slip_verification_mode",
+        "bank_name, bank_code, bank_account_name, bank_account_number, promptpay_qr_image_url, hero_slides, reviews_section_enabled, slip_verification_mode",
       )
       .single(),
     supabase
@@ -45,6 +45,7 @@ export default async function AdminSettingsPage() {
         <ShopSettingsForm
           initialValues={{
             bankName: settings?.bank_name ?? "",
+            bankCode: settings?.bank_code ?? "",
             bankAccountName: settings?.bank_account_name ?? "",
             bankAccountNumber: settings?.bank_account_number ?? "",
             promptpayQrImageUrl: settings?.promptpay_qr_image_url ?? null,

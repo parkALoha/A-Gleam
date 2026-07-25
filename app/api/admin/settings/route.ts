@@ -13,6 +13,7 @@ const heroSlideSchema = z.object({
 
 const schema = z.object({
   bankName: z.string().trim().nullable(),
+  bankCode: z.string().trim().nullable(),
   bankAccountName: z.string().trim().nullable(),
   bankAccountNumber: z.string().trim().nullable(),
   promptpayQrImageUrl: z.string().nullable(),
@@ -37,6 +38,7 @@ export async function PATCH(request: Request) {
     .from("shop_settings")
     .update({
       bank_name: body.data.bankName || null,
+      bank_code: body.data.bankCode || null,
       bank_account_name: body.data.bankAccountName || null,
       bank_account_number: body.data.bankAccountNumber || null,
       promptpay_qr_image_url: body.data.promptpayQrImageUrl,

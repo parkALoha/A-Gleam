@@ -126,9 +126,17 @@ export async function POST(request: Request) {
 
   const { data: settings } = await supabase
     .from("shop_settings")
-    .select("slip_verification_mode")
+    .select("slip_verification_mode, bank_code, bank_account_number, bank_account_name")
     .single();
   const verificationMode = settings?.slip_verification_mode ?? "manual";
+  const receiver =
+    settings?.bank_code && settings?.bank_account_number && settings?.bank_account_name
+      ? {
+          bankCode: settings.bank_code,
+          accountNumber: settings.bank_account_number,
+          accountNameTH: settings.bank_account_name,
+        }
+      : undefined;
 
   const [{ error: uploadError }, verification] = await Promise.all([
     supabase.storage
@@ -136,7 +144,7 @@ export async function POST(request: Request) {
       .upload(slipPath, slipBuffer, { contentType: detectedType.mime }),
     verificationMode === "manual"
       ? Promise.resolve(null)
-      : verifySlip(slipBuffer, detectedType.mime, totalAmount),
+      : verifySlip(slipBuffer, detectedType.mime, totalAmount, receiver),
   ]);
 
   if (uploadError) {

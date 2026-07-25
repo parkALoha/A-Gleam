@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
 import type { HeroSlide } from "@/lib/shop-settings";
+import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
 
 const POSITION_OPTIONS: { value: HeroSlide["position"]; label: string }[] = [
   { value: "top", label: "บน" },
@@ -36,6 +37,7 @@ const SLIP_VERIFICATION_OPTIONS: {
 
 export type ShopSettingsValues = {
   bankName: string;
+  bankCode: string;
   bankAccountName: string;
   bankAccountNumber: string;
   promptpayQrImageUrl: string | null;
@@ -99,6 +101,7 @@ export default function ShopSettingsForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bankName: values.bankName,
+          bankCode: values.bankCode,
           bankAccountName: values.bankAccountName,
           bankAccountNumber: values.bankAccountNumber,
           promptpayQrImageUrl: values.promptpayQrImageUrl,
@@ -134,14 +137,17 @@ export default function ShopSettingsForm({
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-shop-text" htmlFor="bank_name">
-              ธนาคาร
-            </label>
-            <input
-              id="bank_name"
-              value={values.bankName}
-              onChange={(e) => update("bankName", e.target.value)}
-              className={fieldClass}
+            <label className="text-sm font-medium text-shop-text">ธนาคาร</label>
+            <Select
+              value={values.bankCode}
+              onChange={(code) => {
+                update("bankCode", code);
+                update("bankName", bankNameForCode(code) ?? "");
+              }}
+              options={[
+                { value: "", label: "เลือกธนาคาร" },
+                ...THAI_BANKS.map((b) => ({ value: b.code, label: b.name })),
+              ]}
             />
           </div>
           <div>
