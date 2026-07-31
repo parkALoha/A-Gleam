@@ -40,6 +40,17 @@ export default function PromptPayQr({
     );
   }
 
-  // eslint-disable-next-line @next/next/no-img-element -- a locally-generated data: URI, not an optimizable remote image
-  return <img src={dataUrl} alt="QR พร้อมเพย์" className="h-40 w-40 rounded-xl bg-white p-2" />;
+  return (
+    <div className="flex flex-col items-center gap-2">
+      {/* eslint-disable-next-line @next/next/no-img-element -- a locally-generated data: URI, not an optimizable remote image */}
+      <img src={dataUrl} alt="QR พร้อมเพย์" className="h-40 w-40 rounded-xl bg-white p-2" />
+      <a
+        href={dataUrl}
+        download="promptpay-qr.png"
+        className="rounded-full border border-shop-blush-200 bg-white px-4 py-1.5 text-xs font-medium text-shop-text transition-colors hover:bg-shop-blush-50"
+      >
+        บันทึกรูป QR
+      </a>
+    </div>
+  );
 }
