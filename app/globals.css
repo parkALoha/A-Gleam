@@ -37,6 +37,19 @@ body {
   color: var(--foreground);
 }
 
+/* iOS Safari auto-zooms the whole page on focus for any text input/select/
+   textarea with a computed font-size under 16px, and doesn't reliably zoom
+   back out — that's the "some buttons zoom in" bug on mobile. Most of our
+   form fields use Tailwind's text-sm (14px), so force 16px on small
+   viewports only; desktop keeps the smaller, denser look. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 @keyframes pop-in {
   0% {
     transform: scale(0.6);
