@@ -30,7 +30,7 @@ export default function CheckoutForm({
   settings: ShopSettings;
 }) {
   const router = useRouter();
-  const { items, totalPrice, clearCart, hydrated } = useCart();
+  const { items, totalPrice, hydrated } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slipFile, setSlipFile] = useState<File | null>(null);
@@ -114,7 +114,10 @@ export default function CheckoutForm({
         return;
       }
 
-      clearCart();
+      // Clearing the cart here (while this page is still mounted) makes
+      // CheckoutForm's own empty-cart branch flash for a moment before the
+      // navigation below finishes — cleared instead on the confirmation
+      // page itself, once we're safely past this screen.
       router.push(`/checkout/confirmation/${data.orderNumber}`);
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");

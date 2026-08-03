@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/service";
 import CreateAccountForm from "@/components/CreateAccountForm";
+import ClearCartOnMount from "@/components/ClearCartOnMount";
 
 export default async function OrderConfirmationPage({
   params,
@@ -18,6 +19,7 @@ export default async function OrderConfirmationPage({
 
   return (
     <div className="mx-auto max-w-lg px-5 py-20 text-center">
+      <ClearCartOnMount />
       <p className="text-4xl">🎀</p>
       <h1 className="mt-4 text-2xl font-semibold text-shop-text">
         ขอบคุณสำหรับคำสั่งซื้อ
