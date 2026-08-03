@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import Pagination from "@/components/admin/Pagination";
+import OrderSearch from "@/components/admin/OrderSearch";
 
 const PAGE_SIZE = 20;
 
@@ -20,17 +21,18 @@ const TABS = [
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; q?: string }>;
 }) {
   await getAdminSession();
-  const { status, page: pageParam } = await searchParams;
+  const { status, page: pageParam, q } = await searchParams;
   const activeStatus = status ?? "pending_verification";
+  const query = q?.trim() ?? "";
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = createServiceClient();
-  let query = supabase
+  let ordersQuery = supabase
     .from("orders")
     .select("order_number, customer_name, customer_phone, total_amount, status, created_at", {
       count: "exact",
@@ -39,10 +41,20 @@ export default async function AdminOrdersPage({
     .range(from, to);
 
   if (activeStatus !== "all") {
-    query = query.eq("status", activeStatus);
+    ordersQuery = ordersQuery.eq("status", activeStatus);
   }
 
-  const { data: orders, count } = await query;
+  if (query) {
+    // Strip characters that have special meaning in PostgREST's or() filter
+    // syntax (commas separate conditions, parens group them) so a search
+    // term containing them can't break or redefine the filter structure.
+    const safeQuery = query.replace(/[,()]/g, "");
+    ordersQuery = ordersQuery.or(
+      `order_number.ilike.%${safeQuery}%,customer_name.ilike.%${safeQuery}%,customer_phone.ilike.%${safeQuery}%`,
+    );
+  }
+
+  const { data: orders, count } = await ordersQuery;
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
@@ -53,7 +65,7 @@ export default async function AdminOrdersPage({
         {TABS.map((tab) => (
           <Link
             key={tab.status}
-            href={`/admin/orders?status=${tab.status}`}
+            href={`/admin/orders?status=${tab.status}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
             className={`whitespace-nowrap rounded-full px-4 py-2 transition-colors ${
               activeStatus === tab.status
                 ? "bg-shop-blush-500 text-white shadow-sm"
@@ -65,8 +77,12 @@ export default async function AdminOrdersPage({
         ))}
       </div>
 
+      <OrderSearch defaultValue={query} status={activeStatus} />
+
       {!orders || orders.length === 0 ? (
-        <p className="mt-10 text-center text-shop-text-soft">ไม่มีคำสั่งซื้อในหมวดนี้</p>
+        <p className="mt-10 text-center text-shop-text-soft">
+          {query ? `ไม่พบคำสั่งซื้อที่ตรงกับ "${query}"` : "ไม่มีคำสั่งซื้อในหมวดนี้"}
+        </p>
       ) : (
         <div className="mt-6 space-y-3">
           {orders.map((order) => (
@@ -103,7 +119,9 @@ export default async function AdminOrdersPage({
       <Pagination
         page={page}
         totalPages={totalPages}
-        buildHref={(p) => `/admin/orders?status=${activeStatus}&page=${p}`}
+        buildHref={(p) =>
+          `/admin/orders?status=${activeStatus}&page=${p}${query ? `&q=${encodeURIComponent(query)}` : ""}`
+        }
       />
     </div>
   );

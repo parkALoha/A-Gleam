@@ -11,6 +11,7 @@ import { translateAuthError } from "@/lib/auth-errors";
 export default function CustomerAuthForm() {
   const router = useRouter();
   const [tab, setTab] = useState<"login" | "signup">("login");
+  const [forgotPassword, setForgotPassword] = useState(false);
 
   // Login state
   const [identifier, setIdentifier] = useState("");
@@ -22,8 +23,37 @@ export default function CustomerAuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
 
+  // Forgot-password state
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        resetEmail.trim(),
+        { redirectTo: `${window.location.origin}/account/reset-password` },
+      );
+
+      if (resetError) {
+        setError(translateAuthError(resetError, "ส่งลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง"));
+        return;
+      }
+
+      setResetSent(true);
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -87,6 +117,59 @@ export default function CustomerAuthForm() {
     }
   }
 
+  if (forgotPassword) {
+    return (
+      <div className="mx-auto mt-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-shop-blush-100">
+        <button
+          type="button"
+          onClick={() => {
+            setForgotPassword(false);
+            setResetSent(false);
+            setError(null);
+          }}
+          className="text-sm text-shop-text-soft hover:text-shop-blush-600"
+        >
+          ← กลับไปเข้าสู่ระบบ
+        </button>
+
+        <h2 className="mt-3 text-lg font-semibold text-shop-text">ลืมรหัสผ่าน</h2>
+
+        {resetSent ? (
+          <p className="mt-3 text-sm text-shop-text-soft">
+            ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่ {resetEmail} แล้ว กรุณาตรวจสอบอีเมลของคุณ
+            (รวมถึงโฟลเดอร์สแปม)
+          </p>
+        ) : (
+          <form onSubmit={handleForgotPassword} className="mt-3">
+            <label className="text-sm font-medium text-shop-text" htmlFor="reset_email">
+              อีเมลที่ใช้สมัครสมาชิก
+            </label>
+            <input
+              id="reset_email"
+              type="email"
+              required
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              onInvalid={thaiInvalidMessage}
+              onInput={clearCustomValidity}
+              className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+            />
+
+            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-5 w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? "กำลังส่ง..." : "ส่งลิงก์ตั้งรหัสผ่านใหม่"}
+            </button>
+          </form>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto mt-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-shop-blush-100">
       <div className="flex rounded-full bg-shop-blush-50 p-1 text-sm font-medium">
@@ -146,6 +229,17 @@ export default function CustomerAuthForm() {
                 autoComplete="current-password"
               />
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setForgotPassword(true);
+                setResetEmail(identifier.includes("@") ? identifier : "");
+                setError(null);
+              }}
+              className="mt-2 text-xs text-shop-text-soft hover:text-shop-blush-600"
+            >
+              ลืมรหัสผ่าน?
+            </button>
           </div>
 
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}

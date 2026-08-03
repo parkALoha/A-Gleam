@@ -29,6 +29,7 @@ export default async function CheckoutPage() {
         district: profile.district ?? "",
         province: profile.province ?? "",
         postal_code: profile.postal_code ?? "",
+        customer_email: user.email ?? "",
       };
     } else {
       // No saved profile address yet — fall back to their last order.
@@ -41,7 +42,16 @@ export default async function CheckoutPage() {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      defaultValues = lastOrder ?? undefined;
+      defaultValues = {
+        customer_name: lastOrder?.customer_name ?? "",
+        customer_phone: lastOrder?.customer_phone ?? "",
+        address_line: lastOrder?.address_line ?? "",
+        subdistrict: lastOrder?.subdistrict ?? "",
+        district: lastOrder?.district ?? "",
+        province: lastOrder?.province ?? "",
+        postal_code: lastOrder?.postal_code ?? "",
+        customer_email: user.email ?? "",
+      };
     }
   }
 

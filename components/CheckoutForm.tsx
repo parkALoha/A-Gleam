@@ -19,6 +19,7 @@ type CheckoutDefaultValues = {
   district: string;
   province: string;
   postal_code: string;
+  customer_email?: string;
 };
 
 export default function CheckoutForm({
@@ -230,6 +231,19 @@ export default function CheckoutForm({
           maxLength={10}
           required
           defaultValue={defaultValues?.customer_phone}
+          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-shop-text" htmlFor="customer_email">
+          อีเมล (ไม่บังคับ — รับแจ้งเตือนเมื่อสถานะออเดอร์เปลี่ยน)
+        </label>
+        <input
+          id="customer_email"
+          name="customer_email"
+          type="email"
+          defaultValue={defaultValues?.customer_email}
           className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
         />
       </div>

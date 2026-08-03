@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendOrderStatusEmail } from "@/lib/email";
 
 export async function POST(
   request: Request,
@@ -16,7 +17,7 @@ export async function POST(
 
   const { data: order } = await supabase
     .from("orders")
-    .select("id")
+    .select("id, customer_name, customer_email")
     .eq("order_number", orderNumber)
     .maybeSingle();
 
@@ -33,6 +34,15 @@ export async function POST(
       ? "ยืนยันไม่สำเร็จ — สต็อกไม่พอ (อาจมีออเดอร์อื่นที่ยืนยันไปแล้วตัดสต็อกไปก่อน กรุณาตรวจสอบ)"
       : "ยืนยันคำสั่งซื้อไม่สำเร็จ (อาจถูกดำเนินการไปแล้ว)";
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  if (order.customer_email) {
+    await sendOrderStatusEmail({
+      to: order.customer_email,
+      customerName: order.customer_name,
+      orderNumber,
+      status: "confirmed",
+    });
   }
 
   return NextResponse.json({ success: true });

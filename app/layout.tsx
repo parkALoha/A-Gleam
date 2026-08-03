@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // Only the weights actually used in Tailwind classes across the app —
@@ -11,10 +12,28 @@ const prompt = Prompt({
   weight: ["400", "500", "600", "700"],
 });
 
+const description =
+  "A GLEAM — เสื้อผู้หญิงสไตล์ casual น่ารักทุกวัน ไซส์เดียวใส่ได้ทุกวัน สั่งซื้อออนไลน์ได้เลย";
+
 export const metadata: Metadata = {
-  title: "A GLEAM | อะ - กลีม",
-  description:
-    "A GLEAM — เสื้อผู้หญิงสไตล์ casual น่ารักทุกวัน ไซส์เดียวใส่ได้ทุกวัน สั่งซื้อออนไลน์ได้เลย",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: "A GLEAM | อะ - กลีม",
+    template: "%s | A GLEAM",
+  },
+  description,
+  openGraph: {
+    title: "A GLEAM | อะ - กลีม",
+    description,
+    siteName: "A GLEAM | อะ - กลีม",
+    locale: "th_TH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "A GLEAM | อะ - กลีม",
+    description,
+  },
 };
 
 export default function RootLayout({

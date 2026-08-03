@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendOrderStatusEmail } from "@/lib/email";
 
 const schema = z.object({ note: z.string().trim().optional() });
 
@@ -28,7 +29,7 @@ export async function POST(
     })
     .eq("order_number", orderNumber)
     .eq("status", "pending_verification")
-    .select("id")
+    .select("id, customer_name, customer_email")
     .maybeSingle();
 
   if (error || !order) {
@@ -36,6 +37,15 @@ export async function POST(
       { error: "ปฏิเสธคำสั่งซื้อไม่สำเร็จ (อาจถูกดำเนินการไปแล้ว)" },
       { status: 400 },
     );
+  }
+
+  if (order.customer_email) {
+    await sendOrderStatusEmail({
+      to: order.customer_email,
+      customerName: order.customer_name,
+      orderNumber,
+      status: "rejected",
+    });
   }
 
   return NextResponse.json({ success: true });

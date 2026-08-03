@@ -10,11 +10,15 @@ const MESSAGES_BY_CODE: Record<string, string> = {
 };
 
 // Supabase's own error messages are in English regardless of page language —
-// map the ones a customer can actually hit during signup to Thai, with a
-// safe generic fallback for anything else.
-export function translateAuthError(error: Pick<AuthError, "code" | "message">): string {
+// map the ones a customer can actually hit during signup/reset to Thai, with
+// a safe generic fallback (caller-supplied, since "signup failed" doesn't fit
+// every call site) for anything else.
+export function translateAuthError(
+  error: Pick<AuthError, "code" | "message">,
+  fallback = "สมัครสมาชิกไม่สำเร็จ ลองใหม่อีกครั้ง",
+): string {
   if (error.code && MESSAGES_BY_CODE[error.code]) {
     return MESSAGES_BY_CODE[error.code];
   }
-  return "สมัครสมาชิกไม่สำเร็จ ลองใหม่อีกครั้ง";
+  return fallback;
 }

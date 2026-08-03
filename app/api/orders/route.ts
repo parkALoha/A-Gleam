@@ -20,6 +20,9 @@ const orderFieldsSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{5}$/, "รหัสไปรษณีย์ต้องเป็นตัวเลข 5 หลัก"),
+  // Optional — only used to send order-status notifications, guest checkout
+  // without one still works exactly the same.
+  customer_email: z.union([z.literal(""), z.string().trim().email()]).optional(),
 });
 
 const itemsSchema = z
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
     district: formData.get("district"),
     province: formData.get("province"),
     postal_code: formData.get("postal_code"),
+    customer_email: formData.get("customer_email") ?? "",
   });
   if (!fields.success) {
     return NextResponse.json(
@@ -168,6 +172,7 @@ export async function POST(request: Request) {
     order_number: orderNumber,
     customer_name: fields.data.customer_name,
     customer_phone: fields.data.customer_phone,
+    customer_email: fields.data.customer_email || null,
     address_line: fields.data.address_line,
     subdistrict: fields.data.subdistrict,
     district: fields.data.district,

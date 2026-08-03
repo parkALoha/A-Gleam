@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendOrderStatusEmail } from "@/lib/email";
 
 export async function POST(
   request: Request,
@@ -19,7 +20,7 @@ export async function POST(
     .update({ status: "returned", updated_at: new Date().toISOString() })
     .eq("order_number", orderNumber)
     .eq("status", "shipped")
-    .select("id")
+    .select("id, customer_name, customer_email")
     .maybeSingle();
 
   if (error || !order) {
@@ -27,6 +28,15 @@ export async function POST(
       { error: "อัปเดตสถานะไม่สำเร็จ (อาจถูกดำเนินการไปแล้ว)" },
       { status: 400 },
     );
+  }
+
+  if (order.customer_email) {
+    await sendOrderStatusEmail({
+      to: order.customer_email,
+      customerName: order.customer_name,
+      orderNumber,
+      status: "returned",
+    });
   }
 
   return NextResponse.json({ success: true });
