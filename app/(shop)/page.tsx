@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   getPublishedProducts,
   type ProductTagFilter,
@@ -26,9 +27,25 @@ const CATEGORY_LABELS: Record<CategoryParam, string> = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; search?: string }>;
+  searchParams: Promise<{ tag?: string; search?: string; code?: string; error?: string }>;
 }) {
-  const { tag: tagParam, search } = await searchParams;
+  const { tag: tagParam, search, code, error } = await searchParams;
+
+  // A Supabase password-recovery link lands here (instead of
+  // /account/reset-password, where it's actually meant to go) whenever the
+  // exact redirectTo URL isn't in the project's Auth → URL Configuration
+  // allowlist — Supabase silently falls back to the bare Site URL rather
+  // than erroring, for both the success case (?code=) and the failure case
+  // (?error=... when the link is expired/already used). Either way, forward
+  // it to the page that can actually do something with it instead of
+  // leaving the customer stranded on a plain homepage with no explanation.
+  if (code) {
+    redirect(`/account/reset-password?code=${encodeURIComponent(code)}`);
+  }
+  if (error) {
+    redirect("/account/reset-password");
+  }
+
   const category = VALID_CATEGORY_PARAMS.includes(tagParam as CategoryParam)
     ? (tagParam as CategoryParam)
     : undefined;
