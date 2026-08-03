@@ -6,25 +6,24 @@ import { formatPrice } from "@/lib/format";
 import PublishToggle from "@/components/admin/PublishToggle";
 import TagQuickSelect from "@/components/admin/TagQuickSelect";
 import Pagination from "@/components/admin/Pagination";
+import ProductSearch from "@/components/admin/ProductSearch";
 
 const PAGE_SIZE = 20;
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   await getAdminSession();
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, q } = await searchParams;
+  const query = q?.trim() ?? "";
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = createServiceClient();
-  const {
-    data: products,
-    count,
-  } = await supabase
+  let productsQuery = supabase
     .from("products")
     .select(
       "id, slug, name, price, compare_at_price, tag, cover_image, is_published, product_variants(images, stock_quantity)",
@@ -32,6 +31,12 @@ export default async function AdminProductsPage({
     )
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (query) {
+    productsQuery = productsQuery.ilike("name", `%${query}%`);
+  }
+
+  const { data: products, count } = await productsQuery;
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
@@ -47,8 +52,12 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
+      <ProductSearch defaultValue={query} />
+
       {!products || products.length === 0 ? (
-        <p className="mt-10 text-center text-shop-text-soft">ยังไม่มีสินค้า</p>
+        <p className="mt-10 text-center text-shop-text-soft">
+          {query ? `ไม่พบสินค้าที่ตรงกับ "${query}"` : "ยังไม่มีสินค้า"}
+        </p>
       ) : (
         <div className="mt-6 space-y-3">
           {products.map((product) => {
@@ -102,7 +111,13 @@ export default async function AdminProductsPage({
         </div>
       )}
 
-      <Pagination page={page} totalPages={totalPages} buildHref={(p) => `/admin/products?page=${p}`} />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        buildHref={(p) =>
+          `/admin/products?page=${p}${query ? `&q=${encodeURIComponent(query)}` : ""}`
+        }
+      />
     </div>
   );
 }
