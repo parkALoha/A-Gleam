@@ -65,7 +65,7 @@ export default function Footer() {
             การลบข้อมูลผู้ใช้
           </a>
         </div>
-        <p className="mt-2">© 2020 A GLEAM | อะ - กลีม สงวนลิขสิทธิ์</p>
+        <p className="mt-2">© {new Date().getFullYear()} A GLEAM | อะ - กลีม สงวนลิขสิทธิ์</p>
       </div>
     </footer>
   );

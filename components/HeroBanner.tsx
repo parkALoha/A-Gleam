@@ -51,7 +51,7 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                 alt=""
                 aria-hidden
                 fill
-                unoptimized
+                sizes="100vw"
                 className="scale-110 object-cover opacity-60 blur-2xl"
               />
               {/* Full photo, never cropped — photos are portrait (iPhone),
@@ -60,7 +60,7 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                 src={slide.imageUrl}
                 alt={slide.headline || title}
                 fill
-                unoptimized
+                sizes="100vw"
                 priority={index === 0}
                 className="object-contain"
               />

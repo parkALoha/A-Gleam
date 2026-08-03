@@ -28,7 +28,7 @@ export default function ReviewGallery({ reviews }: { reviews: Review[] }) {
                   src={review.imageUrl}
                   alt={review.customerHandle}
                   fill
-                  unoptimized
+                  sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
                   className="object-cover"
                 />
               </div>

@@ -34,7 +34,7 @@ export default function AvatarBadge({
         className="relative inline-block shrink-0 overflow-hidden rounded-full"
         style={{ width: size, height: size }}
       >
-        <Image src={avatarUrl} alt="" fill unoptimized className="object-cover" />
+        <Image src={avatarUrl} alt="" fill sizes={`${size}px`} className="object-cover" />
       </span>
     );
   }

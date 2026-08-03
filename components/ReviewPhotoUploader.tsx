@@ -63,7 +63,7 @@ export default function ReviewPhotoUploader({
     <div>
       {imageUrl ? (
         <div className="relative h-32 w-32 overflow-hidden rounded-xl ring-1 ring-shop-blush-100">
-          <Image src={imageUrl} alt="" fill unoptimized className="object-cover" />
+          <Image src={imageUrl} alt="" fill sizes="128px" className="object-cover" />
           <button
             type="button"
             onClick={() => onChange(null)}

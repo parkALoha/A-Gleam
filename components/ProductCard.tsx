@@ -3,7 +3,13 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { formatPrice, formatTag } from "@/lib/format";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
   const [variantCover, variantSecond] = product.images;
   // If a cover image (e.g. an "all colors at a glance" shot) is set, show it
   // as a static image instead of crossfading between one variant's photos —
@@ -25,7 +31,8 @@ export default function ProductCard({ product }: { product: Product }) {
           src={cover}
           alt={product.name}
           fill
-          unoptimized
+          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+          priority={priority}
           className={`object-cover transition-opacity duration-300 ${second ? "group-hover:opacity-0" : ""}`}
         />
         {second && (
@@ -33,7 +40,7 @@ export default function ProductCard({ product }: { product: Product }) {
             src={second}
             alt={product.name}
             fill
-            unoptimized
+            sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
             className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           />
         )}

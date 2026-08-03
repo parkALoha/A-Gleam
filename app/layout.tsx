@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
 
+// Only the weights actually used in Tailwind classes across the app —
+// "300" was never referenced anywhere, just extra font-file weight on
+// every page load.
 const prompt = Prompt({
   variable: "--font-prompt",
   subsets: ["latin", "thai"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {

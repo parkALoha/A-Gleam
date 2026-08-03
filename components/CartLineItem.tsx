@@ -73,7 +73,7 @@ export default function CartLineItem({
           src={item.image}
           alt={item.name}
           fill
-          unoptimized
+          sizes="80px"
           loading="eager"
           className="object-cover"
         />

@@ -81,8 +81,8 @@ export default function ProductGridPaginated({
   return (
     <>
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {products.map((product, index) => (
+          <ProductCard key={product.id} product={product} priority={index === 0} />
         ))}
       </div>
 

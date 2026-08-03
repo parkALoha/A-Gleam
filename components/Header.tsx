@@ -36,7 +36,6 @@ export default async function Header() {
               alt=""
               width={44}
               height={44}
-              unoptimized
               className="h-7 w-7 sm:h-10 sm:w-10"
             />
             <span className="text-base font-semibold tracking-wide text-shop-text sm:text-2xl sm:tracking-widest">
@@ -75,34 +74,34 @@ export default async function Header() {
       </div>
 
       <div className="border-b border-shop-blush-100 bg-shop-cream/90 backdrop-blur">
-        <nav className="mx-auto flex max-w-6xl items-center justify-center gap-6 px-5 py-3 text-sm font-medium text-shop-text">
+        <nav className="mx-auto flex max-w-6xl items-center justify-center gap-4 overflow-x-auto px-5 py-3 text-sm font-medium text-nowrap text-shop-text sm:gap-6">
           <Link
             href="/"
-            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+            className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             หน้าแรก
           </Link>
           <Link
             href="/?tag=new#products"
-            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+            className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าใหม่
           </Link>
           <Link
             href="/?tag=bestseller#products"
-            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+            className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             ขายดี
           </Link>
           <Link
             href="/?tag=all#products"
-            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+            className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าทั้งหมด
           </Link>
           <Link
             href="/?tag=sale#products"
-            className="relative py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
+            className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             SALE
           </Link>

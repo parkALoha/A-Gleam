@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -32,6 +32,25 @@ export default function CheckoutForm({
   const { items, totalPrice, clearCart, hydrated } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipPreview, setSlipPreview] = useState<string | null>(null);
+
+  // Revoke the previous object URL whenever it's replaced or the form unmounts,
+  // so we don't leak blob: URLs while the customer tries a few slip photos.
+  useEffect(() => {
+    return () => {
+      if (slipPreview) URL.revokeObjectURL(slipPreview);
+    };
+  }, [slipPreview]);
+
+  function handleSlipChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setSlipFile(file);
+    setSlipPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return file ? URL.createObjectURL(file) : null;
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -159,7 +178,7 @@ export default function CheckoutForm({
                   src={settings.promptpayQrImageUrl}
                   alt="QR พร้อมเพย์"
                   fill
-                  unoptimized
+                  sizes="160px"
                   className="object-contain p-2"
                 />
               </div>
@@ -246,14 +265,42 @@ export default function CheckoutForm({
         <label className="text-sm font-medium text-shop-text" htmlFor="slip">
           แนบรูปสลิปโอนเงิน
         </label>
-        <input
-          id="slip"
-          name="slip"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          required
-          className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm text-shop-text file:mr-3 file:rounded-full file:border-0 file:bg-shop-blush-100 file:px-3 file:py-1.5 file:text-shop-blush-600"
-        />
+        <div className="relative mt-1.5">
+          <input
+            id="slip"
+            name="slip"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            required
+            onChange={handleSlipChange}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          />
+          <div className="flex items-center gap-3 rounded-xl border border-dashed border-shop-blush-200 bg-white px-4 py-3">
+            {slipPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- local blob: preview, not an optimizable remote image
+              <img
+                src={slipPreview}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-lg object-cover"
+              />
+            ) : (
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-shop-blush-50 text-shop-blush-400">
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10.5M4 16.5l4.5-4.5a2 2 0 0 1 2.8 0L14 14.7m0 0 1.7-1.7a2 2 0 0 1 2.8 0L20 15M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" />
+                </svg>
+              </span>
+            )}
+            <div className="min-w-0 flex-1 text-sm">
+              <p className="truncate font-medium text-shop-text">
+                {slipFile ? slipFile.name : "แตะเพื่อเลือกรูปสลิป"}
+              </p>
+              <p className="text-xs text-shop-text-soft">JPG, PNG หรือ WebP</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-shop-blush-100 px-3 py-1.5 text-xs font-medium text-shop-blush-600">
+              {slipFile ? "เปลี่ยนรูป" : "เลือกไฟล์"}
+            </span>
+          </div>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}

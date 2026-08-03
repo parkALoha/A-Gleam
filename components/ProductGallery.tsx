@@ -111,7 +111,7 @@ export default function ProductGallery({
               src={shownSrc}
               alt={alt}
               fill
-              unoptimized
+              sizes="(min-width: 640px) 50vw, 100vw"
               className="object-cover"
               priority
             />
@@ -120,7 +120,7 @@ export default function ProductGallery({
                 src={incomingSrc}
                 alt={alt}
                 fill
-                unoptimized
+                sizes="(min-width: 640px) 50vw, 100vw"
                 onLoad={() => setFadeIn(true)}
                 onTransitionEnd={handleFadeEnd}
                 className={`object-cover transition-opacity duration-200 ${
@@ -196,7 +196,7 @@ export default function ProductGallery({
                     src={src}
                     alt={`${alt} ${index + 1}`}
                     fill
-                    unoptimized
+                    sizes="(min-width: 640px) 17vw, 33vw"
                     className="object-cover"
                   />
                 )}
