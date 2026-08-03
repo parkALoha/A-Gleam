@@ -31,7 +31,7 @@ export default function OrderSearch({
         className="h-4 w-4 shrink-0 text-shop-text-soft"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         aria-hidden
       >
         <path
@@ -59,7 +59,7 @@ export default function OrderSearch({
             className="h-4 w-4"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
             aria-hidden
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

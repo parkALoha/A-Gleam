@@ -92,7 +92,7 @@ export default function SearchOverlay() {
                   className="h-4 w-4 shrink-0 text-shop-text-soft"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                   aria-hidden
                 >
                   <path
