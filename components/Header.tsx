@@ -20,7 +20,7 @@ export default function Header() {
               alt=""
               width={44}
               height={44}
-              className="h-7 w-7 sm:h-10 sm:w-10"
+              className="h-9 w-9 sm:h-10 sm:w-10"
             />
             <span className="text-base font-semibold tracking-wide text-shop-text sm:text-2xl sm:tracking-widest">
               AGLEAMIN3011

@@ -20,11 +20,7 @@ export default function ProductCard({
   return (
     <Link
       href={`/products/${product.slug}`}
-      className={`group block overflow-hidden rounded-3xl bg-white shadow-sm transition-shadow hover:shadow-md ${
-        product.tag
-          ? "ring-2 ring-shop-blush-400"
-          : "ring-1 ring-shop-blush-100"
-      }`}
+      className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-shop-blush-100 transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-shop-blush-50">
         <Image
