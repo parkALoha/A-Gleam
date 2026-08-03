@@ -29,10 +29,10 @@ export async function POST(
   });
 
   if (error) {
-    return NextResponse.json(
-      { error: "ยืนยันคำสั่งซื้อไม่สำเร็จ (อาจถูกดำเนินการไปแล้ว)" },
-      { status: 400 },
-    );
+    const message = error.message?.includes("insufficient stock")
+      ? "ยืนยันไม่สำเร็จ — สต็อกไม่พอ (อาจมีออเดอร์อื่นที่ยืนยันไปแล้วตัดสต็อกไปก่อน กรุณาตรวจสอบ)"
+      : "ยืนยันคำสั่งซื้อไม่สำเร็จ (อาจถูกดำเนินการไปแล้ว)";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   return NextResponse.json({ success: true });

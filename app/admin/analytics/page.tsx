@@ -39,8 +39,9 @@ export default async function AdminAnalyticsPage() {
         .gte("created_at", rangeStart.toISOString()),
       supabase
         .from("order_items")
-        .select("product_name, quantity, orders!inner(status)")
-        .in("orders.status", SALES_STATUSES),
+        .select("product_name, quantity, orders!inner(status, created_at)")
+        .in("orders.status", SALES_STATUSES)
+        .gte("orders.created_at", rangeStart.toISOString()),
       supabase
         .from("product_variants")
         .select("color_name, stock_quantity, products(name, slug, is_published)")
@@ -114,7 +115,7 @@ export default async function AdminAnalyticsPage() {
       </div>
 
       <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
-        <p className="font-medium text-shop-text">สินค้าขายดี Top 10</p>
+        <p className="font-medium text-shop-text">สินค้าขายดี Top 10 ({DAYS} วันล่าสุด)</p>
         {topProducts.length === 0 ? (
           <p className="mt-3 text-sm text-shop-text-soft">ยังไม่มีออเดอร์ที่ยืนยันแล้ว</p>
         ) : (

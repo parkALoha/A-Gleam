@@ -12,25 +12,40 @@ export default function PromptPayQr({
   amount: number;
 }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (amount <= 0) return;
     let cancelled = false;
 
     Promise.resolve()
-      .then(() => buildPromptPayPayload(promptPayId, amount))
+      .then(() => {
+        if (!cancelled) setFailed(false);
+        return buildPromptPayPayload(promptPayId, amount);
+      })
       .then((payload) => QRCode.toDataURL(payload, { margin: 1, width: 320 }))
       .then((url) => {
         if (!cancelled) setDataUrl(url);
       })
       .catch(() => {
-        if (!cancelled) setDataUrl(null);
+        if (!cancelled) {
+          setDataUrl(null);
+          setFailed(true);
+        }
       });
 
     return () => {
       cancelled = true;
     };
   }, [promptPayId, amount]);
+
+  if (failed) {
+    return (
+      <div className="flex h-40 w-40 items-center justify-center rounded-xl bg-white p-3 text-center text-xs text-shop-text-soft">
+        สร้าง QR ไม่สำเร็จ โอนตามเลขบัญชีด้านข้างได้เลย
+      </div>
+    );
+  }
 
   if (amount <= 0 || !dataUrl) {
     return (

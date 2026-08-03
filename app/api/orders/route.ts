@@ -7,6 +7,7 @@ import { isAllowedImageType } from "@/lib/image-validation";
 import { fileTypeFromBuffer } from "file-type";
 import { buildOrderItems, type VariantWithProduct } from "@/lib/order-pricing";
 import { verifySlip } from "@/lib/slip2go";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const orderFieldsSchema = z.object({
   customer_name: z.string().trim().min(1, "กรุณากรอกชื่อ-นามสกุล"),
@@ -33,6 +34,14 @@ const itemsSchema = z
 const MAX_SLIP_SIZE = 5 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (!(await checkRateLimit(`create-order:${ip}`, 10, 15 * 60 * 1000))) {
+    return NextResponse.json(
+      { error: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
+      { status: 429 },
+    );
+  }
+
   const formData = await request.formData();
 
   const fields = orderFieldsSchema.safeParse({
@@ -185,6 +194,11 @@ export async function POST(request: Request) {
   );
 
   if (itemsError) {
+    // Don't leave a half-written order behind — a row in `orders` with no
+    // items would sit in the admin queue looking paid-but-empty, and the
+    // customer would have no working order to point their slip at anyway.
+    await supabase.from("orders").delete().eq("id", orderId);
+    await supabase.storage.from("payment-slips").remove([slipPath]);
     return NextResponse.json(
       { error: "บันทึกรายการสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง" },
       { status: 500 },
