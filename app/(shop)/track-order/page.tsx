@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
+import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 
 type OrderResult = {
   orderNumber: string;
-  statusLabel: string;
+  status: string;
   totalAmount: number;
   trackingNumber: string | null;
   createdAt: string;
@@ -116,12 +117,13 @@ export default function TrackOrderPage() {
                   })}
                 </p>
               </div>
-              <span className="rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
-                {order.statusLabel}
-              </span>
             </div>
 
-            <ul className="mt-3 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
+            <div className="mt-4 border-t border-shop-blush-100 pt-4">
+              <OrderStatusTimeline status={order.status} trackingNumber={order.trackingNumber} />
+            </div>
+
+            <ul className="mt-4 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
               {order.items.map((item, i) => (
                 <li key={i} className="flex justify-between">
                   <span>
@@ -137,11 +139,6 @@ export default function TrackOrderPage() {
                 {formatPrice(order.totalAmount)}
               </span>
             </div>
-            {order.trackingNumber && (
-              <p className="mt-2 text-xs text-shop-text-soft">
-                เลขพัสดุ: {order.trackingNumber}
-              </p>
-            )}
           </div>
         </div>
       )}

@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import AccountLogoutButton from "@/components/AccountLogoutButton";
-import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import OrderStatusSummary from "@/components/OrderStatusSummary";
+import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 
 const CUSTOMER_SUMMARY_ITEMS = [
   { status: "pending_verification", icon: "pending", label: "รอตรวจสอบ" },
@@ -97,12 +97,13 @@ export default async function AccountOrdersPage({
                     })}
                   </p>
                 </div>
-                <span className="rounded-full bg-shop-blush-50 px-3 py-1 text-xs font-medium text-shop-blush-600">
-                  {ORDER_STATUS_LABELS[order.status] ?? order.status}
-                </span>
               </div>
 
-              <ul className="mt-3 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
+              <div className="mt-4 border-t border-shop-blush-100 pt-4">
+                <OrderStatusTimeline status={order.status} trackingNumber={order.tracking_number} />
+              </div>
+
+              <ul className="mt-4 space-y-1 border-t border-shop-blush-100 pt-3 text-sm text-shop-text-soft">
                 {order.order_items.map((item, i) => (
                   <li key={i} className="flex justify-between">
                     <span>
@@ -118,11 +119,6 @@ export default async function AccountOrdersPage({
                   {formatPrice(order.total_amount)}
                 </span>
               </div>
-              {order.tracking_number && (
-                <p className="mt-2 text-xs text-shop-text-soft">
-                  เลขพัสดุ: {order.tracking_number}
-                </p>
-              )}
               {order.status === "delivered" && (
                 <div className="mt-3 border-t border-shop-blush-100 pt-3">
                   {reviewedOrderIds.has(order.id) ? (
