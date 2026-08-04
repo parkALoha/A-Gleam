@@ -5,21 +5,13 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
 import HeroBanner from "@/components/HeroBanner";
-import type { HeroSlide, HeroLine, HeroTextSize } from "@/lib/shop-settings";
+import type { HeroSlide, HeroLine } from "@/lib/shop-settings";
 import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
 
 const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
   { value: "light", label: "อ่อน" },
   { value: "medium", label: "กลาง" },
   { value: "dark", label: "เข้ม" },
-];
-
-const TEXT_SIZE_OPTIONS: { value: HeroTextSize; label: string }[] = [
-  { value: "xs", label: "จิ๋ว" },
-  { value: "sm", label: "เล็ก" },
-  { value: "md", label: "กลาง" },
-  { value: "lg", label: "ใหญ่" },
-  { value: "xl", label: "ใหญ่พิเศษ" },
 ];
 
 const CATEGORY_LINK_OPTIONS = [
@@ -72,7 +64,7 @@ export default function ShopSettingsForm({
       ...values.heroSlides,
       {
         imageUrl: "",
-        lines: [{ text: "", size: "lg" }],
+        lines: [{ text: "", size: 7 }],
         positionX: 50,
         positionY: 82,
         overlay: "medium",
@@ -97,7 +89,7 @@ export default function ShopSettingsForm({
 
   function addLine(slideIndex: number) {
     const slide = values.heroSlides[slideIndex];
-    updateSlide(slideIndex, { lines: [...slide.lines, { text: "", size: "md" }] });
+    updateSlide(slideIndex, { lines: [...slide.lines, { text: "", size: 5 }] });
   }
 
   function updateLine(slideIndex: number, lineIndex: number, patch: Partial<HeroLine>) {
@@ -317,12 +309,18 @@ export default function ShopSettingsForm({
                         placeholder={`บรรทัดที่ ${li + 1}`}
                         className={fieldClass}
                       />
-                      <div className="w-32 shrink-0">
-                        <Select
+                      <div className="flex w-20 shrink-0 items-center gap-1">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min={0.5}
+                          max={20}
+                          step={0.5}
                           value={line.size}
-                          onChange={(value) => updateLine(i, li, { size: value as HeroTextSize })}
-                          options={TEXT_SIZE_OPTIONS}
+                          onChange={(e) => updateLine(i, li, { size: Number(e.target.value) })}
+                          className="mt-1.5 w-14 rounded-xl border border-shop-blush-100 bg-white px-2.5 py-2.5 text-sm text-shop-text outline-none focus:border-shop-blush-500"
                         />
+                        <span className="mt-1.5 text-xs text-shop-text-soft">%</span>
                       </div>
                       {slide.lines.length > 1 && (
                         <button

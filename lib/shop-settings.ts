@@ -2,11 +2,11 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export type HeroOverlay = "light" | "medium" | "dark";
 
-export type HeroTextSize = "xs" | "sm" | "md" | "lg" | "xl";
-
 export type HeroLine = {
   text: string;
-  size: HeroTextSize;
+  /** Font size as cqw — % of the hero box's own width — so admins can pick
+   * any value instead of a fixed set of presets. */
+  size: number;
 };
 
 export type HeroSlide = {
@@ -20,9 +20,25 @@ export type HeroSlide = {
   linkUrl: string;
 };
 
+// Rows saved while `size` was still a preset name ("sm"/"lg"/...) — map
+// those onto roughly the same cqw values so old slides don't jump in size.
+const LEGACY_TEXT_SIZE_PERCENT: Record<string, number> = {
+  xs: 2,
+  sm: 3,
+  md: 5,
+  lg: 7,
+  xl: 9,
+};
+
+function normalizeHeroLineSize(size: unknown): number {
+  if (typeof size === "number") return size;
+  if (typeof size === "string") return LEGACY_TEXT_SIZE_PERCENT[size] ?? 5;
+  return 5;
+}
+
 const DEFAULT_HERO_LINES: HeroLine[] = [
-  { text: "Casual & Cuteness Everyday ☁️", size: "sm" },
-  { text: "แต่งตัวให้น่ารักทุกวัน", size: "lg" },
+  { text: "Casual & Cuteness Everyday ☁️", size: LEGACY_TEXT_SIZE_PERCENT.sm },
+  { text: "แต่งตัวให้น่ารักทุกวัน", size: LEGACY_TEXT_SIZE_PERCENT.lg },
 ];
 
 // Rows saved before free positioning existed only have the old 3-value
@@ -57,9 +73,12 @@ export function normalizeHeroSlide(
     // as fixed markup, so those slides keep their exact previous look.
     lines:
       slide.lines && slide.lines.length > 0
-        ? slide.lines
+        ? slide.lines.map((line) => ({
+            text: line.text ?? "",
+            size: normalizeHeroLineSize(line.size),
+          }))
         : slide.headline
-          ? [DEFAULT_HERO_LINES[0], { text: slide.headline, size: "lg" }]
+          ? [DEFAULT_HERO_LINES[0], { text: slide.headline, size: LEGACY_TEXT_SIZE_PERCENT.lg }]
           : DEFAULT_HERO_LINES,
     positionX: slide.positionX ?? 50,
     positionY:

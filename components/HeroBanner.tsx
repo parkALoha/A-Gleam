@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import type { HeroSlide, HeroTextSize } from "@/lib/shop-settings";
+import type { HeroSlide } from "@/lib/shop-settings";
 
 const HERO_HEIGHT_CLASSES =
   "relative h-[46vh] min-h-[300px] max-h-[520px] w-full sm:h-[52vh] sm:max-h-[600px]";
@@ -21,13 +21,16 @@ const OVERLAY_CLASSES: Record<HeroSlide["overlay"], string> = {
 // the real page but wrong in the editor. Container-relative sizing stays
 // accurate in both places, and still scales smoothly across every real
 // screen width instead of jumping between fixed breakpoints.
-const SIZE_CLAMP: Record<HeroTextSize, string> = {
-  xs: "clamp(0.625rem, 2cqw, 0.8125rem)",
-  sm: "clamp(0.875rem, 3cqw, 1.125rem)",
-  md: "clamp(1.25rem, 5cqw, 2rem)",
-  lg: "clamp(1.75rem, 7cqw, 3.5rem)",
-  xl: "clamp(2.25rem, 9cqw, 4.5rem)",
-};
+//
+// The admin picks the free-form cqw value (shown to them as "%"); min/max
+// here are just a safety net so a typo or an extreme screen width can't
+// make a line vanish or blow past the image.
+const MIN_FONT_REM = 0.625;
+const MAX_FONT_REM = 5;
+
+function fontSizeFor(percent: number) {
+  return `clamp(${MIN_FONT_REM}rem, ${percent}cqw, ${MAX_FONT_REM}rem)`;
+}
 
 // 3x3 quick-pick points, for when nudging a pixel at a time isn't worth it.
 const POSITION_PRESETS: { label: string; x: number; y: number }[] = [
@@ -164,7 +167,7 @@ export default function HeroBanner({
             <p
               key={i}
               className="leading-snug font-semibold tracking-wide drop-shadow-sm"
-              style={{ fontSize: SIZE_CLAMP[line.size], marginTop: i === 0 ? 0 : "0.4em" }}
+              style={{ fontSize: fontSizeFor(line.size), marginTop: i === 0 ? 0 : "0.4em" }}
             >
               {line.text}
             </p>
