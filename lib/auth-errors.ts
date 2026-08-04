@@ -7,6 +7,9 @@ const MESSAGES_BY_CODE: Record<string, string> = {
   validation_failed: "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
   over_email_send_rate_limit: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
   over_request_rate_limit: "ลองมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+  // Supabase uses this single code for both "wrong code" and "code expired"
+  // — there's no way to tell the two apart from the response.
+  otp_expired: "รหัสไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอรหัสใหม่",
 };
 
 // Supabase's own error messages are in English regardless of page language —

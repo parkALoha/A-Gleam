@@ -25,9 +25,16 @@ export default function CustomerAuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
 
-  // Forgot-password state
+  // Forgot-password state — OTP-based: request a code by email, then verify
+  // it plus a new password, all on this same form. No link to click, no
+  // redirect URL, no page to land on — sidesteps the whole class of
+  // PKCE/hash-parsing bugs a link-based flow has.
+  const [resetStep, setResetStep] = useState<"request" | "verify">("request");
   const [resetEmail, setResetEmail] = useState("");
-  const [resetSent, setResetSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [resetDone, setResetDone] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [emailTaken, setEmailTaken] = useState(false);
@@ -42,15 +49,62 @@ export default function CustomerAuthForm() {
       const supabase = createBrowserSupabaseClient();
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         resetEmail.trim(),
-        { redirectTo: `${window.location.origin}/account/reset-password` },
       );
 
       if (resetError) {
-        setError(translateAuthError(resetError, "ส่งลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง"));
+        setError(translateAuthError(resetError, "ส่งรหัสไม่สำเร็จ ลองใหม่อีกครั้ง"));
         return;
       }
 
-      setResetSent(true);
+      setResetStep("verify");
+    } catch {
+      setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (newPassword !== newPasswordConfirm) {
+      setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
+      return;
+    }
+    if (!isPasswordStrong(newPassword)) {
+      setError("รหัสผ่านยังไม่ตรงตามเงื่อนไขความปลอดภัยด้านล่าง");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: resetEmail.trim(),
+        token: otpCode.trim(),
+        type: "recovery",
+      });
+
+      if (verifyError) {
+        setError(translateAuthError(verifyError, "ยืนยันรหัสไม่สำเร็จ ลองใหม่อีกครั้ง"));
+        return;
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        setError(translateAuthError(updateError, "ตั้งรหัสผ่านใหม่ไม่สำเร็จ ลองใหม่อีกครั้ง"));
+        return;
+      }
+
+      setResetDone(true);
+      setTimeout(() => {
+        router.push("/account/orders");
+        router.refresh();
+      }, 1500);
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
@@ -134,7 +188,11 @@ export default function CustomerAuthForm() {
           type="button"
           onClick={() => {
             setForgotPassword(false);
-            setResetSent(false);
+            setResetStep("request");
+            setResetDone(false);
+            setOtpCode("");
+            setNewPassword("");
+            setNewPasswordConfirm("");
             setError(null);
           }}
           className="text-sm text-shop-text-soft hover:text-shop-blush-600"
@@ -144,12 +202,11 @@ export default function CustomerAuthForm() {
 
         <h2 className="mt-3 text-lg font-semibold text-shop-text">ลืมรหัสผ่าน</h2>
 
-        {resetSent ? (
+        {resetDone ? (
           <p className="mt-3 text-sm text-shop-text-soft">
-            ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่ {resetEmail} แล้ว กรุณาตรวจสอบอีเมลของคุณ
-            (รวมถึงโฟลเดอร์สแปม)
+            ตั้งรหัสผ่านใหม่สำเร็จ ✓ กำลังพาไปหน้าคำสั่งซื้อ...
           </p>
-        ) : (
+        ) : resetStep === "request" ? (
           <form onSubmit={handleForgotPassword} className="mt-3">
             <label className="text-sm font-medium text-shop-text" htmlFor="reset_email">
               อีเมลที่ใช้สมัครสมาชิก
@@ -172,7 +229,89 @@ export default function CustomerAuthForm() {
               disabled={submitting}
               className="mt-5 w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? "กำลังส่ง..." : "ส่งลิงก์ตั้งรหัสผ่านใหม่"}
+              {submitting ? "กำลังส่ง..." : "ส่งรหัสยืนยัน"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="mt-3">
+            <p className="text-sm text-shop-text-soft">
+              ส่งรหัสยืนยัน 6 หลักไปที่ {resetEmail} แล้ว กรุณาตรวจสอบอีเมล
+              (รวมถึงโฟลเดอร์สแปม)
+            </p>
+
+            <div className="mt-4">
+              <label className="text-sm font-medium text-shop-text" htmlFor="otp_code">
+                รหัสยืนยัน
+              </label>
+              <input
+                id="otp_code"
+                required
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                onInvalid={thaiInvalidMessage}
+                onInput={clearCustomValidity}
+                className="mt-1.5 w-full rounded-xl border border-shop-blush-100 bg-white px-4 py-2.5 text-sm tracking-widest text-shop-text outline-none focus:border-shop-blush-500"
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm font-medium text-shop-text" htmlFor="new_password">
+                รหัสผ่านใหม่
+              </label>
+              <div className="mt-1.5">
+                <PasswordInput
+                  id="new_password"
+                  value={newPassword}
+                  onChange={setNewPassword}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+              </div>
+              <PasswordStrengthChecklist password={newPassword} />
+            </div>
+
+            <div className="mt-4">
+              <label
+                className="text-sm font-medium text-shop-text"
+                htmlFor="new_password_confirm"
+              >
+                ยืนยันรหัสผ่านใหม่
+              </label>
+              <div className="mt-1.5">
+                <PasswordInput
+                  id="new_password_confirm"
+                  value={newPasswordConfirm}
+                  onChange={setNewPasswordConfirm}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+
+            {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-5 w-full rounded-full bg-shop-blush-500 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? "กำลังบันทึก..." : "ตั้งรหัสผ่านใหม่"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setResetStep("request");
+                setOtpCode("");
+                setError(null);
+              }}
+              className="mt-3 w-full text-center text-xs text-shop-text-soft hover:text-shop-blush-600"
+            >
+              ยังไม่ได้รับรหัส? ขอรหัสใหม่
             </button>
           </form>
         )}
