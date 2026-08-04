@@ -1,7 +1,15 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { getAdminUser } from "@/lib/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import PageLoading from "@/components/PageLoading";
+
+// A static file, not the special app/manifest.ts convention — that one only
+// works at the app root, and this needs to apply to /admin alone so
+// customers browsing the shop never get an "install app" prompt for it.
+export const metadata: Metadata = {
+  manifest: "/admin-manifest.webmanifest",
+};
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
   const admin = await getAdminUser();

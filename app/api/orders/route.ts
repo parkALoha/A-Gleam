@@ -8,6 +8,7 @@ import { fileTypeFromBuffer } from "file-type";
 import { buildOrderItems, type VariantWithProduct } from "@/lib/order-pricing";
 import { verifySlip } from "@/lib/slip2go";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { notifyAdminsNewOrder } from "@/lib/push";
 
 const orderFieldsSchema = z.object({
   customer_name: z.string().trim().min(1, "กรุณากรอกชื่อ-นามสกุล"),
@@ -216,6 +217,8 @@ export async function POST(request: Request) {
   if (verificationMode === "auto_confirm" && verification?.status === "verified") {
     await supabase.rpc("confirm_order", { p_order_id: orderId });
   }
+
+  await notifyAdminsNewOrder(orderNumber, totalAmount);
 
   return NextResponse.json({ orderNumber }, { status: 201 });
 }

@@ -1,0 +1,14 @@
+{
+  "name": "A GLEAM แอดมิน",
+  "short_name": "A GLEAM แอดมิน",
+  "description": "จัดการร้าน A GLEAM — ออเดอร์ สินค้า และตั้งค่าร้าน",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#f0e6dc",
+  "theme_color": "#e9d9ca",
+  "icons": [
+    { "src": "/admin-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/admin-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

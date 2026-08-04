@@ -2,6 +2,7 @@ import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import ShopSettingsForm from "@/components/admin/ShopSettingsForm";
 import ReviewManager from "@/components/admin/ReviewManager";
+import PushNotificationToggle from "@/components/admin/PushNotificationToggle";
 import { normalizeHeroSlide, type HeroSlide } from "@/lib/shop-settings";
 
 // Supabase's inferred type for a to-one embed (via a unique FK) is an
@@ -40,6 +41,10 @@ export default async function AdminSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">ตั้งค่าร้าน</h1>
+
+      <div className="mt-6">
+        <PushNotificationToggle />
+      </div>
 
       <div className="mt-6">
         <ShopSettingsForm
