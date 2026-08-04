@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import type { HeroSlide } from "@/lib/shop-settings";
+import type { HeroSlide, HeroTextSize } from "@/lib/shop-settings";
 
 const HERO_HEIGHT_CLASSES =
   "relative h-[46vh] min-h-[300px] max-h-[520px] w-full sm:h-[52vh] sm:max-h-[600px]";
@@ -14,6 +14,32 @@ const OVERLAY_CLASSES: Record<HeroSlide["overlay"], string> = {
   medium: "from-black/55 via-transparent to-transparent",
   dark: "from-black/75 via-black/10 to-transparent",
 };
+
+// Sized off the container's own width (cqw), not the viewport (vw) — the
+// admin editor renders this same component in a much narrower column than
+// the full-bleed homepage, so a viewport-relative size would look right on
+// the real page but wrong in the editor. Container-relative sizing stays
+// accurate in both places, and still scales smoothly across every real
+// screen width instead of jumping between fixed breakpoints.
+const SIZE_CLAMP: Record<HeroTextSize, string> = {
+  sm: "clamp(0.875rem, 3cqw, 1.125rem)",
+  md: "clamp(1.25rem, 5cqw, 2rem)",
+  lg: "clamp(1.75rem, 7cqw, 3.5rem)",
+  xl: "clamp(2.25rem, 9cqw, 4.5rem)",
+};
+
+// 3x3 quick-pick points, for when nudging a pixel at a time isn't worth it.
+const POSITION_PRESETS: { label: string; x: number; y: number }[] = [
+  { label: "บนซ้าย", x: 10, y: 15 },
+  { label: "บนกลาง", x: 50, y: 15 },
+  { label: "บนขวา", x: 90, y: 15 },
+  { label: "ซ้ายกลาง", x: 10, y: 50 },
+  { label: "กึ่งกลาง", x: 50, y: 50 },
+  { label: "ขวากลาง", x: 90, y: 50 },
+  { label: "ล่างซ้าย", x: 10, y: 85 },
+  { label: "ล่างกลาง", x: 50, y: 85 },
+  { label: "ล่างขวา", x: 90, y: 85 },
+];
 
 // Anchors the text block to the nearest edge of its (x, y) point instead of
 // always centering on it — a tall block centered on a point near the bottom
@@ -41,7 +67,6 @@ export default function HeroBanner({
   const [activeIndex, setActiveIndex] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
   const active = slides[activeIndex];
-  const title = active?.headline || "แต่งตัวให้น่ารักทุกวัน";
   const positionX = active?.positionX ?? 50;
   const positionY = active?.positionY ?? 82;
   const translateX = edgeTranslate(positionX, "0%", "-50%", "-100%");
@@ -69,6 +94,7 @@ export default function HeroBanner({
       <div
         ref={boxRef}
         className={`${HERO_HEIGHT_CLASSES} ${editable ? "touch-none cursor-crosshair select-none" : ""}`}
+        style={{ containerType: "inline-size" }}
         onPointerDown={
           editable
             ? (e) => {
@@ -107,7 +133,7 @@ export default function HeroBanner({
                   so this always shows the whole shot, heads included */}
               <Image
                 src={slide.imageUrl}
-                alt={slide.headline || title}
+                alt={slide.lines.map((l) => l.text).join(" ")}
                 fill
                 sizes="100vw"
                 priority={index === 0}
@@ -133,12 +159,15 @@ export default function HeroBanner({
             transform: `translate(${translateX}, ${translateY})`,
           }}
         >
-          <p className="text-xs font-medium tracking-wide sm:text-sm">
-            Casual &amp; Cuteness Everyday ☁️
-          </p>
-          <h1 className="mt-3 text-3xl leading-snug font-semibold drop-shadow-sm sm:text-5xl sm:leading-snug">
-            {title}
-          </h1>
+          {(active?.lines ?? []).map((line, i) => (
+            <p
+              key={i}
+              className="leading-snug font-semibold tracking-wide drop-shadow-sm"
+              style={{ fontSize: SIZE_CLAMP[line.size], marginTop: i === 0 ? 0 : "0.4em" }}
+            >
+              {line.text}
+            </p>
+          ))}
           {editable ? (
             <span className="mt-6 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm">
               ช้อปเลย
@@ -153,7 +182,20 @@ export default function HeroBanner({
           )}
         </div>
 
-        {slides.length > 1 && (
+        {editable &&
+          POSITION_PRESETS.map(({ label, x, y }) => (
+            <button
+              key={label}
+              type="button"
+              aria-label={`ตำแหน่ง ${label}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onPositionChange?.(x, y)}
+              className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/80 bg-black/10 transition-colors hover:bg-white/60"
+              style={{ left: `${x}%`, top: `${y}%` }}
+            />
+          ))}
+
+        {!editable && slides.length > 1 && (
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
             {slides.map((_, index) => (
               <button
@@ -169,6 +211,13 @@ export default function HeroBanner({
           </div>
         )}
       </div>
+
+      {editable && (
+        <p className="bg-shop-beige-50 px-3 py-1.5 text-center text-[11px] text-shop-text-soft">
+          ตำแหน่ง: X {positionX}% · Y {positionY}% — คลิกจุดบนภาพเพื่อเลือกตำแหน่งสำเร็จรูป
+          หรือลากอิสระ
+        </p>
+      )}
     </section>
   );
 }

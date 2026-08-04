@@ -5,13 +5,20 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
 import HeroBanner from "@/components/HeroBanner";
-import type { HeroSlide } from "@/lib/shop-settings";
+import type { HeroSlide, HeroLine, HeroTextSize } from "@/lib/shop-settings";
 import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
 
 const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
   { value: "light", label: "อ่อน" },
   { value: "medium", label: "กลาง" },
   { value: "dark", label: "เข้ม" },
+];
+
+const TEXT_SIZE_OPTIONS: { value: HeroTextSize; label: string }[] = [
+  { value: "sm", label: "เล็ก" },
+  { value: "md", label: "กลาง" },
+  { value: "lg", label: "ใหญ่" },
+  { value: "xl", label: "ใหญ่พิเศษ" },
 ];
 
 const CATEGORY_LINK_OPTIONS = [
@@ -62,7 +69,14 @@ export default function ShopSettingsForm({
   function addSlide() {
     update("heroSlides", [
       ...values.heroSlides,
-      { imageUrl: "", headline: "", positionX: 50, positionY: 82, overlay: "medium", linkUrl: "" },
+      {
+        imageUrl: "",
+        lines: [{ text: "", size: "lg" }],
+        positionX: 50,
+        positionY: 82,
+        overlay: "medium",
+        linkUrl: "",
+      },
     ]);
   }
 
@@ -78,6 +92,23 @@ export default function ShopSettingsForm({
       "heroSlides",
       values.heroSlides.filter((_, i) => i !== index),
     );
+  }
+
+  function addLine(slideIndex: number) {
+    const slide = values.heroSlides[slideIndex];
+    updateSlide(slideIndex, { lines: [...slide.lines, { text: "", size: "md" }] });
+  }
+
+  function updateLine(slideIndex: number, lineIndex: number, patch: Partial<HeroLine>) {
+    const slide = values.heroSlides[slideIndex];
+    updateSlide(slideIndex, {
+      lines: slide.lines.map((l, i) => (i === lineIndex ? { ...l, ...patch } : l)),
+    });
+  }
+
+  function removeLine(slideIndex: number, lineIndex: number) {
+    const slide = values.heroSlides[slideIndex];
+    updateSlide(slideIndex, { lines: slide.lines.filter((_, i) => i !== lineIndex) });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -264,13 +295,47 @@ export default function ShopSettingsForm({
               </div>
 
               <div className="mt-3">
-                <label className="text-xs text-shop-text-soft">ข้อความหัวข้อ</label>
-                <input
-                  value={slide.headline}
-                  onChange={(e) => updateSlide(i, { headline: e.target.value })}
-                  placeholder="แต่งตัวให้น่ารักทุกวัน"
-                  className={fieldClass}
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-shop-text-soft">
+                    ข้อความ (แต่ละบรรทัดเลือกขนาดตัวอักษรเองได้)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addLine(i)}
+                    className="text-xs font-medium text-shop-blush-600 hover:underline"
+                  >
+                    + เพิ่มบรรทัด
+                  </button>
+                </div>
+                <div className="mt-1.5 space-y-2">
+                  {slide.lines.map((line, li) => (
+                    <div key={li} className="flex items-center gap-2">
+                      <input
+                        value={line.text}
+                        onChange={(e) => updateLine(i, li, { text: e.target.value })}
+                        placeholder={`บรรทัดที่ ${li + 1}`}
+                        className={fieldClass}
+                      />
+                      <div className="w-32 shrink-0">
+                        <Select
+                          value={line.size}
+                          onChange={(value) => updateLine(i, li, { size: value as HeroTextSize })}
+                          options={TEXT_SIZE_OPTIONS}
+                        />
+                      </div>
+                      {slide.lines.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeLine(i, li)}
+                          aria-label="ลบบรรทัดนี้"
+                          className="shrink-0 px-1 text-red-400 hover:text-red-500"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="mt-3">

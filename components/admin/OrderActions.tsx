@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/components/admin/useConfirm";
+import Select from "@/components/ui/Select";
+
+const REJECTION_PRESETS = [
+  { value: "", note: "", label: "เลือกเหตุผลที่พบบ่อย..." },
+  { value: "amount_mismatch", note: "ยอดเงินที่โอนมาไม่ตรงกับยอดคำสั่งซื้อ", label: "ยอดเงินไม่ตรงกับคำสั่งซื้อ" },
+  { value: "not_found", note: "ตรวจสอบกับธนาคารแล้วไม่พบรายการโอนนี้", label: "ไม่พบรายการโอนในระบบธนาคาร" },
+  { value: "unclear", note: "รูปสลิปไม่ชัดเจน อ่านรายละเอียดไม่ได้ กรุณาส่งสลิปใหม่", label: "สลิปไม่ชัดเจน" },
+  { value: "fraud", note: "สลิปมีลักษณะผิดปกติ สงสัยว่าถูกแก้ไขหรือปลอมแปลง", label: "สงสัยสลิปปลอม/ถูกแก้ไข" },
+  { value: "other", note: "", label: "อื่นๆ (พิมพ์เอง)" },
+];
 
 export default function OrderActions({
   orderNumber,
@@ -16,6 +26,7 @@ export default function OrderActions({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRejectNote, setShowRejectNote] = useState(false);
+  const [reasonPreset, setReasonPreset] = useState("");
   const [note, setNote] = useState("");
 
   async function post(path: string, body?: object) {
@@ -91,8 +102,18 @@ export default function OrderActions({
           </div>
         ) : (
           <div className="space-y-2 rounded-xl border border-red-100 p-4">
+            <label className="text-sm font-medium text-shop-text">เหตุผลที่พบบ่อย</label>
+            <Select
+              value={reasonPreset}
+              onChange={(value) => {
+                setReasonPreset(value);
+                const preset = REJECTION_PRESETS.find((p) => p.value === value);
+                if (preset) setNote(preset.note);
+              }}
+              options={REJECTION_PRESETS}
+            />
             <label className="text-sm font-medium text-shop-text" htmlFor="reject_note">
-              หมายเหตุภายใน (ไม่บังคับ)
+              หมายเหตุภายใน (ไม่บังคับ — แก้ไขข้อความด้านบนเพิ่มเติมได้)
             </label>
             <textarea
               id="reject_note"

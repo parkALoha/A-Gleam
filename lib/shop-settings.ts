@@ -2,9 +2,16 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export type HeroOverlay = "light" | "medium" | "dark";
 
+export type HeroTextSize = "sm" | "md" | "lg" | "xl";
+
+export type HeroLine = {
+  text: string;
+  size: HeroTextSize;
+};
+
 export type HeroSlide = {
   imageUrl: string;
-  headline: string;
+  lines: HeroLine[];
   /** Percent (0-100) from the left/top where the text block is anchored. */
   positionX: number;
   positionY: number;
@@ -12,6 +19,11 @@ export type HeroSlide = {
   /** Where "ช้อปเลย" goes — empty means the default "#products" scroll. */
   linkUrl: string;
 };
+
+const DEFAULT_HERO_LINES: HeroLine[] = [
+  { text: "Casual & Cuteness Everyday ☁️", size: "sm" },
+  { text: "แต่งตัวให้น่ารักทุกวัน", size: "lg" },
+];
 
 // Rows saved before free positioning existed only have the old 3-value
 // "top"/"center"/"bottom" enum — map it to a reasonable Y percent so those
@@ -36,11 +48,19 @@ export type ShopSettings = {
 // fields in the stored jsonb — default them so older slides don't crash on
 // a missing field.
 export function normalizeHeroSlide(
-  slide: Partial<HeroSlide> & { position?: string },
+  slide: Partial<HeroSlide> & { position?: string; headline?: string },
 ): HeroSlide {
   return {
     imageUrl: slide.imageUrl ?? "",
-    headline: slide.headline ?? "",
+    // Rows saved before per-line text existed only have a single `headline`
+    // string — rebuild it as the same two lines HeroBanner used to render
+    // as fixed markup, so those slides keep their exact previous look.
+    lines:
+      slide.lines && slide.lines.length > 0
+        ? slide.lines
+        : slide.headline
+          ? [DEFAULT_HERO_LINES[0], { text: slide.headline, size: "lg" }]
+          : DEFAULT_HERO_LINES,
     positionX: slide.positionX ?? 50,
     positionY:
       slide.positionY ?? (slide.position ? LEGACY_POSITION_Y[slide.position] : 82),
