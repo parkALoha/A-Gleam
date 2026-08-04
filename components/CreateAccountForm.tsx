@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
 import PasswordStrengthChecklist from "@/components/PasswordStrengthChecklist";
@@ -21,12 +22,14 @@ export default function CreateAccountForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailTaken, setEmailTaken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setEmailTaken(false);
 
     if (password !== confirmPassword) {
       setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
@@ -53,6 +56,7 @@ export default function CreateAccountForm({
 
     if (signUpError || !data.user) {
       setError(signUpError ? translateAuthError(signUpError) : "สมัครไม่สำเร็จ ลองใหม่อีกครั้ง");
+      setEmailTaken(signUpError?.code === "user_already_exists");
       setSubmitting(false);
       return;
     }
@@ -164,7 +168,19 @@ export default function CreateAccountForm({
         </span>
       </label>
 
-      {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="mt-3 text-sm text-red-500">
+          {error}
+          {emailTaken && (
+            <>
+              {" "}
+              <Link href="/login" className="font-medium text-shop-blush-600 underline">
+                เข้าสู่ระบบแทน
+              </Link>
+            </>
+          )}
+        </p>
+      )}
 
       <button
         type="submit"

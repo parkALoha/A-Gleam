@@ -30,6 +30,7 @@ export default function CustomerAuthForm() {
   const [resetSent, setResetSent] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
+  const [emailTaken, setEmailTaken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleForgotPassword(e: React.FormEvent) {
@@ -86,6 +87,7 @@ export default function CustomerAuthForm() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setEmailTaken(false);
 
     if (password !== confirmPassword) {
       setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
@@ -112,6 +114,7 @@ export default function CustomerAuthForm() {
 
       if (signUpError) {
         setError(translateAuthError(signUpError));
+        setEmailTaken(signUpError.code === "user_already_exists");
         return;
       }
 
@@ -337,7 +340,28 @@ export default function CustomerAuthForm() {
             </span>
           </label>
 
-          {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+          {error && (
+            <p className="mt-3 text-sm text-red-500">
+              {error}
+              {emailTaken && (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTab("login");
+                      setIdentifier(email);
+                      setError(null);
+                      setEmailTaken(false);
+                    }}
+                    className="font-medium text-shop-blush-600 underline"
+                  >
+                    เข้าสู่ระบบแทน
+                  </button>
+                </>
+              )}
+            </p>
+          )}
 
           <button
             type="submit"
