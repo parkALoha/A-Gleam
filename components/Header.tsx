@@ -39,7 +39,7 @@ export default function Header() {
       </div>
 
       <div className="border-b border-shop-blush-100 bg-shop-cream/90 backdrop-blur">
-        <nav className="mx-auto flex max-w-6xl items-center justify-center gap-4 overflow-x-auto px-5 py-3 text-sm font-medium text-nowrap text-shop-text sm:gap-6">
+        <nav className="mx-auto flex max-w-6xl items-center justify-start gap-4 overflow-x-auto px-5 py-3 text-sm font-medium text-nowrap text-shop-text sm:justify-center sm:gap-6">
           <Link
             href="/"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
