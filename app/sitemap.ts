@@ -3,6 +3,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { getPublishedProducts } from "@/lib/products";
 
 const STATIC_PAGES = ["", "/privacy-policy", "/terms", "/track-order"];
+const COLLECTION_TAGS = ["new", "bestseller", "sale", "all"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
@@ -14,11 +15,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "" ? 1 : 0.5,
   }));
 
+  const collectionEntries: MetadataRoute.Sitemap = COLLECTION_TAGS.map((tag) => ({
+    url: `${base}/collections/${tag}`,
+    changeFrequency: "daily",
+    priority: 0.9,
+  }));
+
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${base}/products/${product.slug}`,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
-  return [...staticEntries, ...productEntries];
+  return [...staticEntries, ...collectionEntries, ...productEntries];
 }

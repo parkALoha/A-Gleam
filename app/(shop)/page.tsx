@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
   getPublishedProducts,
   type ProductTagFilter,
@@ -16,13 +17,6 @@ type CategoryParam = ProductTagFilter | "all";
 
 const VALID_CATEGORY_PARAMS: CategoryParam[] = ["new", "bestseller", "sale", "all"];
 
-const CATEGORY_LABELS: Record<CategoryParam, string> = {
-  new: "สินค้าใหม่",
-  bestseller: "สินค้าขายดี",
-  sale: "สินค้าลดราคา (SALE)",
-  all: "สินค้าทั้งหมด",
-};
-
 export default async function Home({
   searchParams,
 }: {
@@ -30,9 +24,14 @@ export default async function Home({
 }) {
   const { tag: tagParam, search } = await searchParams;
 
-  const category = VALID_CATEGORY_PARAMS.includes(tagParam as CategoryParam)
-    ? (tagParam as CategoryParam)
-    : undefined;
+  // Category browsing moved to its own URL (/collections/[tag]) for SEO —
+  // a dedicated path indexes and shares far better than a query param, and
+  // it's now in the sitemap. Redirect the old link shape permanently so
+  // anything still pointing at it (a bookmark, an old share) lands on the
+  // canonical page instead of duplicating the same content at two URLs.
+  if (VALID_CATEGORY_PARAMS.includes(tagParam as CategoryParam)) {
+    redirect(`/collections/${tagParam}`);
+  }
 
   const settings = await getShopSettings();
 
@@ -64,33 +63,6 @@ export default async function Home({
               search={search}
             />
           )}
-        </section>
-      </>
-    );
-  }
-
-  if (category) {
-    const { products, total } = await getPublishedProducts({
-      tag: category === "all" ? undefined : category,
-      limit: PAGE_SIZE,
-      offset: 0,
-    });
-
-    return (
-      <>
-        <HeroBanner slides={settings.heroSlides} />
-
-        <section id="products" className="mx-auto max-w-6xl scroll-mt-32 px-5 py-14">
-          <h2 className="text-2xl font-semibold text-shop-text">
-            {CATEGORY_LABELS[category]}
-          </h2>
-          <p className="mt-1 text-sm text-shop-text-soft">{total} รายการ</p>
-          <ProductGridPaginated
-            key={`tag:${category}`}
-            initialProducts={products}
-            total={total}
-            tag={category === "all" ? undefined : category}
-          />
         </section>
       </>
     );

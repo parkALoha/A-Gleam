@@ -49,28 +49,28 @@ export default function Header() {
             <NavLinkPendingDot />
           </Link>
           <Link
-            href="/?tag=new#products"
+            href="/collections/new"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าใหม่
             <NavLinkPendingDot />
           </Link>
           <Link
-            href="/?tag=bestseller#products"
+            href="/collections/bestseller"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             ขายดี
             <NavLinkPendingDot />
           </Link>
           <Link
-            href="/?tag=all#products"
+            href="/collections/all"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าทั้งหมด
             <NavLinkPendingDot />
           </Link>
           <Link
-            href="/?tag=sale#products"
+            href="/collections/sale"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             SALE

@@ -15,10 +15,10 @@ const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
 ];
 
 const CATEGORY_LINK_OPTIONS = [
-  { value: "/?tag=new#products", label: "สินค้าใหม่" },
-  { value: "/?tag=bestseller#products", label: "สินค้าขายดี" },
-  { value: "/?tag=sale#products", label: "SALE" },
-  { value: "/?tag=all#products", label: "สินค้าทั้งหมด" },
+  { value: "/collections/new", label: "สินค้าใหม่" },
+  { value: "/collections/bestseller", label: "สินค้าขายดี" },
+  { value: "/collections/sale", label: "SALE" },
+  { value: "/collections/all", label: "สินค้าทั้งหมด" },
 ];
 
 const SLIP_VERIFICATION_OPTIONS: {
