@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { buildPromptPayPayload } from "@/lib/promptpay";
 
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const [header, base64] = dataUrl.split(",");
+  const mime = /:(.*?);/.exec(header)?.[1] ?? "image/png";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new File([bytes], filename, { type: mime });
+}
+
 export default function PromptPayQr({
   promptPayId,
   amount,
@@ -12,6 +21,7 @@ export default function PromptPayQr({
   amount: number;
 }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -25,11 +35,18 @@ export default function PromptPayQr({
       })
       .then((payload) => QRCode.toDataURL(payload, { margin: 1, width: 320 }))
       .then((url) => {
-        if (!cancelled) setDataUrl(url);
+        if (cancelled) return;
+        setDataUrl(url);
+        // Built here (ahead of any tap) so the share button below can call
+        // navigator.share() synchronously with no intervening await — iOS
+        // Safari silently rejects share() once the user-activation window
+        // from the tap has lapsed, which an awaited fetch()-to-blob would do.
+        setFile(dataUrlToFile(url, "promptpay-qr.png"));
       })
       .catch(() => {
         if (!cancelled) {
           setDataUrl(null);
+          setFile(null);
           setFailed(true);
         }
       });
@@ -55,24 +72,22 @@ export default function PromptPayQr({
     );
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!dataUrl) return;
 
-    // iOS Safari doesn't honor the <a download> attribute at all — tapping
-    // it just opens the image instead of saving it. The Web Share API (with
-    // an actual file attached, not just a link) opens the native share
-    // sheet instead, which has "Save Image" built in and works there.
-    try {
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], "promptpay-qr.png", { type: "image/png" });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file] });
-        return;
-      }
-    } catch {
-      // Share sheet cancelled, or share/fetch unsupported — fall through to
-      // the plain download below rather than leaving the tap doing nothing.
+    // iOS Safari's <a download> saves to the Files app instead of Photos
+    // (or does nothing, depending on version) — the Web Share API with a
+    // real file attached opens the native share sheet instead, which has
+    // "Save Image" saving straight to Photos. Must call share() with zero
+    // awaits first: it silently throws once the tap's user-activation
+    // window has lapsed, which is why the file is precomputed on generation
+    // rather than converted from dataUrl here.
+    if (file && navigator.canShare?.({ files: [file] })) {
+      navigator.share({ files: [file] }).catch(() => {
+        // Sharing cancelled or failed — the long-press hint below still
+        // works as a fallback, nothing further to do here.
+      });
+      return;
     }
 
     const link = document.createElement("a");
