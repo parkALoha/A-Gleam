@@ -16,6 +16,20 @@ export function createBrowserSupabaseClient() {
     client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      {
+        auth: {
+          // The default (true) makes the SDK silently auto-exchange any
+          // ?code= or #access_token= in the URL the instant this client is
+          // constructed — which happens as soon as Header mounts on every
+          // page, including /account/reset-password. PKCE codes are
+          // single-use, so by the time ResetPasswordForm's own manual
+          // exchangeCodeForSession() call ran, the code was already
+          // consumed and it failed as "invalid/expired". Turning this off
+          // makes our manual handling in ResetPasswordForm the only path
+          // that ever touches these URL params.
+          detectSessionInUrl: false,
+        },
+      },
     );
   }
   return client;
