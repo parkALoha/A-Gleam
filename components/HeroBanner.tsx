@@ -84,12 +84,12 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
           <p className="text-xs font-medium tracking-wide sm:text-sm">
             Casual &amp; Cuteness Everyday ☁️
           </p>
-          <h1 className="mt-2 text-3xl font-semibold drop-shadow-sm sm:text-5xl">
+          <h1 className="mt-3 text-3xl leading-snug font-semibold drop-shadow-sm sm:text-5xl sm:leading-snug">
             {title}
           </h1>
           <a
             href={active?.linkUrl || "#products"}
-            className="mt-5 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm transition-transform hover:scale-105"
+            className="mt-6 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm transition-transform hover:scale-105"
           >
             ช้อปเลย
           </a>
