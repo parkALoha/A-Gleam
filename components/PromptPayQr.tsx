@@ -55,17 +55,46 @@ export default function PromptPayQr({
     );
   }
 
+  async function handleSave() {
+    if (!dataUrl) return;
+
+    // iOS Safari doesn't honor the <a download> attribute at all — tapping
+    // it just opens the image instead of saving it. The Web Share API (with
+    // an actual file attached, not just a link) opens the native share
+    // sheet instead, which has "Save Image" built in and works there.
+    try {
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], "promptpay-qr.png", { type: "image/png" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+    } catch {
+      // Share sheet cancelled, or share/fetch unsupported — fall through to
+      // the plain download below rather than leaving the tap doing nothing.
+    }
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "promptpay-qr.png";
+    link.click();
+  }
+
   return (
     <div className="flex flex-col items-center gap-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- a locally-generated data: URI, not an optimizable remote image */}
       <img src={dataUrl} alt="QR พร้อมเพย์" className="h-40 w-40 rounded-xl bg-white p-2" />
-      <a
-        href={dataUrl}
-        download="promptpay-qr.png"
+      <button
+        type="button"
+        onClick={handleSave}
         className="rounded-full border border-shop-blush-200 bg-white px-4 py-1.5 text-xs font-medium text-shop-text transition-colors hover:bg-shop-blush-50"
       >
         บันทึกรูป QR
-      </a>
+      </button>
+      <p className="text-center text-[11px] text-shop-text-soft">
+        หรือแตะรูป QR ค้างไว้แล้วเลือก &ldquo;บันทึกรูปภาพ&rdquo;
+      </p>
     </div>
   );
 }
