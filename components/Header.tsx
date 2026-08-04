@@ -3,6 +3,7 @@ import Image from "next/image";
 import CartIndicator from "@/components/CartIndicator";
 import SearchOverlay from "@/components/SearchOverlay";
 import HeaderAccountSlot from "@/components/HeaderAccountSlot";
+import NavLinkPendingDot from "@/components/NavLinkPendingDot";
 
 // Deliberately not fetching auth state here (no cookies()/server client) —
 // the account icon resolves client-side instead (HeaderAccountSlot), so
@@ -45,30 +46,35 @@ export default function Header() {
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             หน้าแรก
+            <NavLinkPendingDot />
           </Link>
           <Link
             href="/?tag=new#products"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าใหม่
+            <NavLinkPendingDot />
           </Link>
           <Link
             href="/?tag=bestseller#products"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             ขายดี
+            <NavLinkPendingDot />
           </Link>
           <Link
             href="/?tag=all#products"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             สินค้าทั้งหมด
+            <NavLinkPendingDot />
           </Link>
           <Link
             href="/?tag=sale#products"
             className="relative shrink-0 py-1 transition-colors hover:text-shop-blush-600 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-shop-blush-500 after:transition-all after:duration-300 hover:after:w-full"
           >
             SALE
+            <NavLinkPendingDot />
           </Link>
         </nav>
       </div>

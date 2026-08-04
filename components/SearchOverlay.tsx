@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SearchOverlay() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [searching, startSearching] = useTransition();
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -17,12 +19,24 @@ export default function SearchOverlay() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
+  // Close the overlay once the pending navigation actually resolves —
+  // closing immediately on submit hid the wait entirely, since this
+  // same-route (new searchParams) transition doesn't trigger loading.tsx.
+  useEffect(() => {
+    if (submittedRef.current && !searching) {
+      submittedRef.current = false;
+      setOpen(false);
+    }
+  }, [searching]);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = query.trim();
     if (!trimmed) return;
-    setOpen(false);
-    router.push(`/?search=${encodeURIComponent(trimmed)}#products`);
+    submittedRef.current = true;
+    startSearching(() => {
+      router.push(`/?search=${encodeURIComponent(trimmed)}#products`);
+    });
   }
 
   return (
@@ -107,9 +121,22 @@ export default function SearchOverlay() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="ค้นหาชื่อรุ่น"
-                  className="w-full bg-transparent text-sm text-shop-text outline-none placeholder:text-shop-text-soft"
+                  enterKeyHint="search"
+                  disabled={searching}
+                  className="w-full bg-transparent text-sm text-shop-text outline-none placeholder:text-shop-text-soft disabled:opacity-60"
                 />
               </div>
+
+              <button
+                type="submit"
+                disabled={searching || !query.trim()}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-shop-blush-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {searching && (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                )}
+                {searching ? "กำลังค้นหา..." : "ค้นหา"}
+              </button>
             </form>
           </div>
         </div>
