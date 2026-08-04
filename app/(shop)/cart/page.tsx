@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import CartLineItem, { type VariantOption } from "@/components/CartLineItem";
 
 export default function CartPage() {
+  const router = useRouter();
+  const [goingToCheckout, startCheckoutNavigation] = useTransition();
   const { items, totalPrice, hydrated } = useCart();
   const [variantsBySlug, setVariantsBySlug] = useState<
     Record<string, VariantOption[]>
@@ -78,12 +81,17 @@ export default function CartPage() {
         </span>
       </div>
 
-      <Link
-        href="/checkout"
-        className="mt-6 block w-full rounded-full bg-shop-blush-500 px-8 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02]"
+      <button
+        type="button"
+        disabled={goingToCheckout}
+        onClick={() => startCheckoutNavigation(() => router.push("/checkout"))}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-shop-blush-500 px-8 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
       >
-        ไปหน้าชำระเงิน
-      </Link>
+        {goingToCheckout && (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+        )}
+        {goingToCheckout ? "กำลังไปหน้าชำระเงิน..." : "ไปหน้าชำระเงิน"}
+      </button>
     </div>
   );
 }
