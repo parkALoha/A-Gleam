@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
+import PasswordStrengthChecklist from "@/components/PasswordStrengthChecklist";
 import SocialAuthButtons from "@/components/SocialAuthButtons";
 import { thaiInvalidMessage, clearCustomValidity } from "@/lib/form-validation";
 import { translateAuthError } from "@/lib/auth-errors";
+import { isPasswordStrong } from "@/lib/password-strength";
 
 export default function CreateAccountForm({
   orderNumber,
@@ -28,6 +30,11 @@ export default function CreateAccountForm({
 
     if (password !== confirmPassword) {
       setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
+      return;
+    }
+
+    if (!isPasswordStrong(password)) {
+      setError("รหัสผ่านยังไม่ตรงตามเงื่อนไขความปลอดภัยด้านล่าง");
       return;
     }
 
@@ -115,10 +122,11 @@ export default function CreateAccountForm({
             value={password}
             onChange={setPassword}
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
           />
         </div>
+        <PasswordStrengthChecklist password={password} />
       </div>
 
       <div className="mt-3">
@@ -131,7 +139,7 @@ export default function CreateAccountForm({
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
           />
         </div>

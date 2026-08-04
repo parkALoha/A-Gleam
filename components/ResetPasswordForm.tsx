@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import PasswordInput from "@/components/PasswordInput";
+import PasswordStrengthChecklist from "@/components/PasswordStrengthChecklist";
 import { translateAuthError } from "@/lib/auth-errors";
+import { isPasswordStrong } from "@/lib/password-strength";
 
 type Status = "waiting" | "ready" | "invalid" | "done";
 
@@ -62,6 +64,11 @@ export default function ResetPasswordForm() {
 
     if (password !== confirmPassword) {
       setError("รหัสผ่านทั้งสองช่องไม่ตรงกัน");
+      return;
+    }
+
+    if (!isPasswordStrong(password)) {
+      setError("รหัสผ่านยังไม่ตรงตามเงื่อนไขความปลอดภัยด้านล่าง");
       return;
     }
 
@@ -125,10 +132,11 @@ export default function ResetPasswordForm() {
             value={password}
             onChange={setPassword}
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
           />
         </div>
+        <PasswordStrengthChecklist password={password} />
       </div>
 
       <div className="mt-4">
@@ -141,7 +149,7 @@ export default function ResetPasswordForm() {
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            minLength={6}
+            minLength={8}
             autoComplete="new-password"
           />
         </div>
