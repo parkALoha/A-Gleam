@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { buildPromptPayPayload } from "@/lib/promptpay";
+import { formatPrice } from "@/lib/format";
 
 function dataUrlToFile(dataUrl: string, filename: string): File {
   const [header, base64] = dataUrl.split(",");
@@ -100,6 +101,9 @@ export default function PromptPayQr({
     <div className="flex flex-col items-center gap-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- a locally-generated data: URI, not an optimizable remote image */}
       <img src={dataUrl} alt="QR พร้อมเพย์" className="h-40 w-40 rounded-xl bg-white p-2" />
+      <p className="text-sm font-semibold text-shop-text">
+        ยอดที่ต้องโอน {formatPrice(amount)}
+      </p>
       <button
         type="button"
         onClick={handleSave}
