@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { HeroSlide } from "@/lib/shop-settings";
 
@@ -26,8 +26,20 @@ function edgeTranslate(percent: number, nearStart: string, middle: string, nearE
   return middle;
 }
 
-export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
+export default function HeroBanner({
+  slides,
+  editable = false,
+  onPositionChange,
+}: {
+  slides: HeroSlide[];
+  // Admin-only "edit" mode — renders this exact component as the position
+  // picker instead of a separate mock preview, so there's no way for the
+  // picker and the real page to ever disagree on where the text lands.
+  editable?: boolean;
+  onPositionChange?: (positionX: number, positionY: number) => void;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const boxRef = useRef<HTMLDivElement>(null);
   const active = slides[activeIndex];
   const title = active?.headline || "แต่งตัวให้น่ารักทุกวัน";
   const positionX = active?.positionX ?? 50;
@@ -36,16 +48,44 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
   const translateY = edgeTranslate(positionY, "0%", "-50%", "-100%");
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (editable || slides.length <= 1) return;
     const id = setInterval(() => {
       setActiveIndex((i) => (i + 1) % slides.length);
     }, SLIDE_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, editable]);
+
+  function setPositionFromPointer(clientX: number, clientY: number) {
+    const box = boxRef.current;
+    if (!box || !onPositionChange) return;
+    const rect = box.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100));
+    onPositionChange(Math.round(x), Math.round(y));
+  }
 
   return (
     <section className="relative isolate overflow-hidden bg-shop-text">
-      <div className={HERO_HEIGHT_CLASSES}>
+      <div
+        ref={boxRef}
+        className={`${HERO_HEIGHT_CLASSES} ${editable ? "touch-none cursor-crosshair select-none" : ""}`}
+        onPointerDown={
+          editable
+            ? (e) => {
+                e.currentTarget.setPointerCapture(e.pointerId);
+                setPositionFromPointer(e.clientX, e.clientY);
+              }
+            : undefined
+        }
+        onPointerMove={
+          editable
+            ? (e) => {
+                if (e.buttons !== 1) return;
+                setPositionFromPointer(e.clientX, e.clientY);
+              }
+            : undefined
+        }
+      >
         {slides.length > 0 ? (
           slides.map((slide, index) => (
             <div
@@ -99,12 +139,18 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
           <h1 className="mt-3 text-3xl leading-snug font-semibold drop-shadow-sm sm:text-5xl sm:leading-snug">
             {title}
           </h1>
-          <a
-            href={active?.linkUrl || "#products"}
-            className="mt-6 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm transition-transform hover:scale-105"
-          >
-            ช้อปเลย
-          </a>
+          {editable ? (
+            <span className="mt-6 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm">
+              ช้อปเลย
+            </span>
+          ) : (
+            <a
+              href={active?.linkUrl || "#products"}
+              className="mt-6 inline-block rounded-full bg-white px-8 py-3 text-sm font-semibold text-shop-blush-600 shadow-sm transition-transform hover:scale-105"
+            >
+              ช้อปเลย
+            </a>
+          )}
         </div>
 
         {slides.length > 1 && (

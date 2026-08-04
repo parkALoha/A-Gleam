@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
-import HeroPositionPicker from "@/components/admin/HeroPositionPicker";
+import HeroBanner from "@/components/HeroBanner";
 import type { HeroSlide } from "@/lib/shop-settings";
 import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
 
@@ -274,16 +274,23 @@ export default function ShopSettingsForm({
               </div>
 
               <div className="mt-3">
-                <label className="text-xs text-shop-text-soft">ตำแหน่งข้อความ</label>
-                <div className="mt-1.5">
-                  <HeroPositionPicker
-                    imageUrl={slide.imageUrl}
-                    positionX={slide.positionX}
-                    positionY={slide.positionY}
-                    onChange={(positionX, positionY) =>
-                      updateSlide(i, { positionX, positionY })
-                    }
-                  />
+                <label className="text-xs text-shop-text-soft">
+                  ตำแหน่งข้อความ — คลิกหรือลากบนภาพเพื่อวาง
+                </label>
+                <div className="mt-1.5 overflow-hidden rounded-lg ring-1 ring-shop-blush-100">
+                  {slide.imageUrl ? (
+                    <HeroBanner
+                      slides={[slide]}
+                      editable
+                      onPositionChange={(positionX, positionY) =>
+                        updateSlide(i, { positionX, positionY })
+                      }
+                    />
+                  ) : (
+                    <div className="flex h-40 items-center justify-center bg-shop-beige-100 px-4 text-center text-xs text-shop-text-soft">
+                      อัปโหลดรูปก่อนเพื่อดูตัวอย่างและวางตำแหน่งข้อความ
+                    </div>
+                  )}
                 </div>
               </div>
 
