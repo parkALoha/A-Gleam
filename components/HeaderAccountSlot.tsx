@@ -16,7 +16,14 @@ export default function HeaderAccountSlot() {
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
 
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    // getSession() reads the locally-stored session with no network round
+    // trip, unlike getUser() which re-validates against the Supabase auth
+    // server every time — worth the tradeoff here since this only decides
+    // which icon to show optimistically. Every actual privileged action
+    // (admin pages, order APIs, etc.) still re-checks with getUser() or
+    // getAdminUser() server-side regardless of what this shows.
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = session?.user;
       if (!user) {
         setState({ status: "signed-out" });
         return;
