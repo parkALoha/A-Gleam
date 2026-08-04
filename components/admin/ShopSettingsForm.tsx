@@ -4,14 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
+import HeroPositionPicker from "@/components/admin/HeroPositionPicker";
 import type { HeroSlide } from "@/lib/shop-settings";
 import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
-
-const POSITION_OPTIONS: { value: HeroSlide["position"]; label: string }[] = [
-  { value: "top", label: "บน" },
-  { value: "center", label: "กลาง" },
-  { value: "bottom", label: "ล่าง" },
-];
 
 const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
   { value: "light", label: "อ่อน" },
@@ -67,7 +62,7 @@ export default function ShopSettingsForm({
   function addSlide() {
     update("heroSlides", [
       ...values.heroSlides,
-      { imageUrl: "", headline: "", position: "bottom", overlay: "medium", linkUrl: "" },
+      { imageUrl: "", headline: "", positionX: 50, positionY: 82, overlay: "medium", linkUrl: "" },
     ]);
   }
 
@@ -278,27 +273,29 @@ export default function ShopSettingsForm({
                 />
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-shop-text-soft">ตำแหน่งข้อความ</label>
-                  <Select
-                    value={slide.position}
-                    onChange={(value) =>
-                      updateSlide(i, { position: value as HeroSlide["position"] })
+              <div className="mt-3">
+                <label className="text-xs text-shop-text-soft">ตำแหน่งข้อความ</label>
+                <div className="mt-1.5">
+                  <HeroPositionPicker
+                    imageUrl={slide.imageUrl}
+                    positionX={slide.positionX}
+                    positionY={slide.positionY}
+                    onChange={(positionX, positionY) =>
+                      updateSlide(i, { positionX, positionY })
                     }
-                    options={POSITION_OPTIONS}
                   />
                 </div>
-                <div>
-                  <label className="text-xs text-shop-text-soft">ความเข้มฉากหลัง</label>
-                  <Select
-                    value={slide.overlay}
-                    onChange={(value) =>
-                      updateSlide(i, { overlay: value as HeroSlide["overlay"] })
-                    }
-                    options={OVERLAY_OPTIONS}
-                  />
-                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="text-xs text-shop-text-soft">ความเข้มฉากหลัง</label>
+                <Select
+                  value={slide.overlay}
+                  onChange={(value) =>
+                    updateSlide(i, { overlay: value as HeroSlide["overlay"] })
+                  }
+                  options={OVERLAY_OPTIONS}
+                />
               </div>
 
               <div className="mt-3">

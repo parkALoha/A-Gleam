@@ -6,7 +6,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 const heroSlideSchema = z.object({
   imageUrl: z.string().min(1),
   headline: z.string().trim(),
-  position: z.enum(["top", "center", "bottom"]),
+  positionX: z.number().min(0).max(100),
+  positionY: z.number().min(0).max(100),
   overlay: z.enum(["light", "medium", "dark"]),
   linkUrl: z.string().trim(),
 });

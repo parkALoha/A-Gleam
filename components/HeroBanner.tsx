@@ -9,22 +9,31 @@ const HERO_HEIGHT_CLASSES =
 
 const SLIDE_INTERVAL_MS = 4500;
 
-const POSITION_CLASSES: Record<HeroSlide["position"], string> = {
-  top: "justify-start pt-10 sm:pt-14",
-  center: "justify-center",
-  bottom: "justify-end pb-14 sm:pb-20",
-};
-
 const OVERLAY_CLASSES: Record<HeroSlide["overlay"], string> = {
   light: "from-black/30 via-transparent to-transparent",
   medium: "from-black/55 via-transparent to-transparent",
   dark: "from-black/75 via-black/10 to-transparent",
 };
 
+// Anchors the text block to the nearest edge of its (x, y) point instead of
+// always centering on it — a tall block centered on a point near the bottom
+// (e.g. y=82) would extend past the image edge and get clipped by the
+// section's overflow-hidden. Anchoring to the nearest third makes it grow
+// inward from whichever edge it's closest to instead.
+function edgeTranslate(percent: number, nearStart: string, middle: string, nearEnd: string) {
+  if (percent < 33) return nearStart;
+  if (percent > 66) return nearEnd;
+  return middle;
+}
+
 export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = slides[activeIndex];
   const title = active?.headline || "แต่งตัวให้น่ารักทุกวัน";
+  const positionX = active?.positionX ?? 50;
+  const positionY = active?.positionY ?? 82;
+  const translateX = edgeTranslate(positionX, "0%", "-50%", "-100%");
+  const translateY = edgeTranslate(positionY, "0%", "-50%", "-100%");
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -77,9 +86,12 @@ export default function HeroBanner({ slides }: { slides: HeroSlide[] }) {
         />
 
         <div
-          className={`absolute inset-0 flex flex-col items-center px-5 text-center text-white ${
-            POSITION_CLASSES[active?.position ?? "bottom"]
-          }`}
+          className="absolute flex w-[85%] max-w-sm flex-col items-center px-5 text-center text-white"
+          style={{
+            left: `${positionX}%`,
+            top: `${positionY}%`,
+            transform: `translate(${translateX}, ${translateY})`,
+          }}
         >
           <p className="text-xs font-medium tracking-wide sm:text-sm">
             Casual &amp; Cuteness Everyday ☁️
