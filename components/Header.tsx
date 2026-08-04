@@ -32,8 +32,8 @@ export default function Header() {
           </Link>
           <div className="flex items-center gap-2 sm:w-32 sm:justify-end sm:gap-4">
             <SearchOverlay />
-            <HeaderAccountSlot />
             <CartIndicator />
+            <HeaderAccountSlot />
           </div>
         </div>
       </div>

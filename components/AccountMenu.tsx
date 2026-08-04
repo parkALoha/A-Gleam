@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { useCart } from "@/context/CartContext";
 
 export default function AccountMenu({ isAdmin }: { isAdmin?: boolean }) {
   const router = useRouter();
+  const { clearCart } = useCart();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +26,7 @@ export default function AccountMenu({ isAdmin }: { isAdmin?: boolean }) {
   async function handleLogout() {
     const supabase = createBrowserSupabaseClient();
     await supabase.auth.signOut();
+    clearCart();
     setOpen(false);
     router.push("/login");
     router.refresh();
