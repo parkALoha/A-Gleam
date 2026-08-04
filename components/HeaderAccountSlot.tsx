@@ -8,7 +8,7 @@ import AccountMenu from "@/components/AccountMenu";
 type State =
   | { status: "loading" }
   | { status: "signed-out" }
-  | { status: "signed-in"; avatarUrl: string | null; fallbackLabel: string; isAdmin: boolean };
+  | { status: "signed-in"; isAdmin: boolean };
 
 export default function HeaderAccountSlot() {
   const [state, setState] = useState<State>({ status: "loading" });
@@ -31,16 +31,11 @@ export default function HeaderAccountSlot() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("avatar_url, full_name, is_admin")
+        .select("is_admin")
         .eq("id", user.id)
         .maybeSingle();
 
-      setState({
-        status: "signed-in",
-        avatarUrl: profile?.avatar_url ?? null,
-        fallbackLabel: profile?.full_name || user.email || "",
-        isAdmin: profile?.is_admin ?? false,
-      });
+      setState({ status: "signed-in", isAdmin: profile?.is_admin ?? false });
     });
   }, []);
 
@@ -75,11 +70,5 @@ export default function HeaderAccountSlot() {
     );
   }
 
-  return (
-    <AccountMenu
-      avatarUrl={state.avatarUrl}
-      fallbackLabel={state.fallbackLabel}
-      isAdmin={state.isAdmin}
-    />
-  );
+  return <AccountMenu isAdmin={state.isAdmin} />;
 }
