@@ -15,28 +15,39 @@ export default function HeaderAccountSlot() {
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
+    let cancelled = false;
 
-    // getSession() reads the locally-stored session with no network round
-    // trip, unlike getUser() which re-validates against the Supabase auth
-    // server every time — worth the tradeoff here since this only decides
-    // which icon to show optimistically. Every actual privileged action
-    // (admin pages, order APIs, etc.) still re-checks with getUser() or
-    // getAdminUser() server-side regardless of what this shows.
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const user = session?.user;
-      if (!user) {
-        setState({ status: "signed-out" });
-        return;
-      }
+    // onAuthStateChange fires once immediately with the current session
+    // (event "INITIAL_SESSION") and again on every future sign-in/sign-out —
+    // a one-time getSession() check would only ever see the state as of
+    // mount, so logging out anywhere else on the page (the account menu's
+    // own signOut() call) would leave this stuck showing "signed in" since
+    // Header never remounts across client-side navigation.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const user = session?.user;
+        if (!user) {
+          setState({ status: "signed-out" });
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", user.id)
-        .maybeSingle();
+        supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .maybeSingle()
+          .then(({ data: profile }) => {
+            if (!cancelled) {
+              setState({ status: "signed-in", isAdmin: profile?.is_admin ?? false });
+            }
+          });
+      },
+    );
 
-      setState({ status: "signed-in", isAdmin: profile?.is_admin ?? false });
-    });
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (state.status === "loading") {
