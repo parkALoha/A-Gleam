@@ -20,36 +20,38 @@ export default function ResetPasswordForm() {
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
 
-    // Supabase's recovery link can arrive as either a PKCE ?code= (the
-    // client library doesn't exchange this on its own) or a legacy
-    // #access_token= hash fragment (which it does detect and exchange
-    // automatically) depending on how the link was issued — handle both
-    // instead of gambling on one. No result within a few seconds means the
-    // link was missing, already used, or expired.
-    const code = searchParams.get("code");
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
-        setStatus(exchangeError ? "invalid" : "ready");
-      });
+    // Supabase's recovery link arrives as either a PKCE ?code= or a legacy
+    // #access_token=/#refresh_token= hash fragment depending on how it was
+    // issued. Rather than trust the client library to auto-detect the hash
+    // case (timing-sensitive: it only fires if this exact client instance
+    // was the one constructed while the hash was still in the URL), parse
+    // and establish the session explicitly either way — deterministic
+    // regardless of what else on the page touched auth first.
+    async function establishSession() {
+      const code = searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        setStatus(error ? "invalid" : "ready");
+        return;
+      }
+
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      if (accessToken && refreshToken && hashParams.get("type") === "recovery") {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        setStatus(error ? "invalid" : "ready");
+        return;
+      }
+
+      setStatus("invalid");
     }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setStatus("ready");
-      }
-    });
-
-    const timeout = setTimeout(() => {
-      setStatus((current) => (current === "waiting" ? "invalid" : current));
-    }, 4000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
-    // Only run once on mount — the code is single-use, re-running on
+    establishSession();
+    // Only run once on mount — the code/token is single-use, re-running on
     // searchParams identity changes would just fail the second time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
