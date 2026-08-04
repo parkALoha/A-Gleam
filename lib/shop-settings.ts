@@ -2,7 +2,7 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export type HeroOverlay = "light" | "medium" | "dark";
 
-export type HeroTextSize = "sm" | "md" | "lg" | "xl";
+export type HeroTextSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 export type HeroLine = {
   text: string;

@@ -15,6 +15,7 @@ const OVERLAY_OPTIONS: { value: HeroSlide["overlay"]; label: string }[] = [
 ];
 
 const TEXT_SIZE_OPTIONS: { value: HeroTextSize; label: string }[] = [
+  { value: "xs", label: "จิ๋ว" },
   { value: "sm", label: "เล็ก" },
   { value: "md", label: "กลาง" },
   { value: "lg", label: "ใหญ่" },

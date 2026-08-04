@@ -22,6 +22,7 @@ const OVERLAY_CLASSES: Record<HeroSlide["overlay"], string> = {
 // accurate in both places, and still scales smoothly across every real
 // screen width instead of jumping between fixed breakpoints.
 const SIZE_CLAMP: Record<HeroTextSize, string> = {
+  xs: "clamp(0.625rem, 2cqw, 0.8125rem)",
   sm: "clamp(0.875rem, 3cqw, 1.125rem)",
   md: "clamp(1.25rem, 5cqw, 2rem)",
   lg: "clamp(1.75rem, 7cqw, 3.5rem)",
