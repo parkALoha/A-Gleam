@@ -13,7 +13,11 @@ export default function Header() {
     <header className="sticky top-0 z-10">
       <div className="bg-shop-blush-100">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <div className="w-12 sm:w-32" aria-hidden />
+          {/* Only reserved on desktop, to balance the icon group so the
+              wordmark sits centered. On mobile there's no third column, so
+              the wordmark lands at the left edge instead of fighting the
+              icon group for centered space. */}
+          <div className="hidden sm:block sm:w-32" aria-hidden />
           <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <Image
               src="/brand/logo-mark-dark.png"
@@ -26,7 +30,7 @@ export default function Header() {
               AGLEAMIN3011
             </span>
           </Link>
-          <div className="flex w-12 items-center justify-end gap-1.5 sm:w-32 sm:gap-4">
+          <div className="flex items-center gap-2 sm:w-32 sm:justify-end sm:gap-4">
             <SearchOverlay />
             <HeaderAccountSlot />
             <CartIndicator />
