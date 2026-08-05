@@ -30,6 +30,8 @@ export async function POST(
     );
   }
 
+  await supabase.rpc("restock_returned_order", { p_order_id: order.id });
+
   if (order.customer_email) {
     await sendOrderStatusEmail({
       to: order.customer_email,
