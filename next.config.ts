@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const SUPABASE_HOSTNAME = "pceaovdyjuvwnytlatsw.supabase.co";
 
@@ -12,7 +13,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: https://${SUPABASE_HOSTNAME}`,
   "font-src 'self' data:",
-  `connect-src 'self' https://${SUPABASE_HOSTNAME}`,
+  `connect-src 'self' https://${SUPABASE_HOSTNAME} https://*.sentry.io`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -50,4 +51,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  // Only matters if org/project/authToken are set — otherwise source map
+  // upload is skipped and this build option has nothing to widen.
+  widenClientFileUpload: true,
+  disableLogger: true,
+});
