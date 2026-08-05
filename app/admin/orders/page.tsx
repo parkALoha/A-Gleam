@@ -109,6 +109,7 @@ export default async function AdminOrdersPage({
                   {new Date(order.created_at).toLocaleString("th-TH", {
                     dateStyle: "long",
                     timeStyle: "short",
+                    timeZone: "Asia/Bangkok",
                   })}
                 </p>
                 <p className="font-semibold text-shop-blush-600">

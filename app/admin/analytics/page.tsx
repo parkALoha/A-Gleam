@@ -1,14 +1,11 @@
 import { getAdminSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { formatPrice } from "@/lib/format";
+import { bangkokDateKey, bangkokMidnightUtc } from "@/lib/bangkok-time";
 
 const SALES_STATUSES = ["confirmed", "shipped", "delivered"];
 const DAYS = 30;
 const LOW_STOCK_THRESHOLD = 5;
-
-function dateKey(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
 
 // Supabase's inferred type for a to-one embed (via the product_variants ->
 // products FK) is an array, but the actual response at runtime is a single
@@ -26,9 +23,8 @@ export default async function AdminAnalyticsPage() {
 
   const supabase = createServiceClient();
 
-  const rangeStart = new Date();
-  rangeStart.setDate(rangeStart.getDate() - (DAYS - 1));
-  rangeStart.setHours(0, 0, 0, 0);
+  const rangeStart = bangkokMidnightUtc(new Date());
+  rangeStart.setUTCDate(rangeStart.getUTCDate() - (DAYS - 1));
 
   const [
     { data: salesOrders, error: salesError },
@@ -58,11 +54,11 @@ export default async function AdminAnalyticsPage() {
   const dailyTotals = new Map<string, number>();
   for (let i = 0; i < DAYS; i++) {
     const d = new Date(rangeStart);
-    d.setDate(d.getDate() + i);
-    dailyTotals.set(dateKey(d), 0);
+    d.setUTCDate(d.getUTCDate() + i);
+    dailyTotals.set(bangkokDateKey(d), 0);
   }
   for (const order of salesOrders ?? []) {
-    const key = dateKey(new Date(order.created_at));
+    const key = bangkokDateKey(new Date(order.created_at));
     dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + Number(order.total_amount));
   }
   const dailyEntries = Array.from(dailyTotals.entries());
@@ -112,14 +108,14 @@ export default async function AdminAnalyticsPage() {
           {dailyEntries.map(([key, amount]) => (
             <div
               key={key}
-              title={`${new Date(key).toLocaleDateString("th-TH", { dateStyle: "medium" })}: ${formatPrice(amount)}`}
+              title={`${new Date(key).toLocaleDateString("th-TH", { dateStyle: "medium", timeZone: "Asia/Bangkok" })}: ${formatPrice(amount)}`}
               className="w-3 shrink-0 rounded-t bg-shop-blush-300 transition-colors hover:bg-shop-blush-500"
               style={{ height: `${Math.max(2, (amount / maxDaily) * 100)}%` }}
             />
           ))}
         </div>
         <div className="mt-2 flex justify-between text-xs text-shop-text-soft">
-          <span>{new Date(rangeStart).toLocaleDateString("th-TH", { dateStyle: "medium" })}</span>
+          <span>{new Date(rangeStart).toLocaleDateString("th-TH", { dateStyle: "medium", timeZone: "Asia/Bangkok" })}</span>
           <span>วันนี้</span>
         </div>
       </div>

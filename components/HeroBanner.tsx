@@ -98,7 +98,6 @@ export default function HeroBanner({
       <div
         ref={boxRef}
         className={`${HERO_HEIGHT_CLASSES} ${editable ? "cursor-crosshair select-none" : ""}`}
-        style={{ containerType: "inline-size" }}
         // Deliberately not using touch-action:none / pointerdown here — on
         // mobile that made any scroll gesture that merely started over the
         // image register as "set position", hijacking the page scroll.
@@ -173,6 +172,7 @@ export default function HeroBanner({
             left: `${positionX}%`,
             top: `${positionY}%`,
             transform: `translate(${translateX}, ${translateY})`,
+            containerType: "inline-size",
           }}
         >
           {(active?.lines ?? []).map((line, i) => (

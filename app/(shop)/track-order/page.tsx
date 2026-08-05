@@ -114,6 +114,7 @@ export default function TrackOrderPage() {
                 <p className="text-xs text-shop-text-soft">
                   {new Date(order.createdAt).toLocaleDateString("th-TH", {
                     dateStyle: "long",
+                    timeZone: "Asia/Bangkok",
                   })}
                 </p>
               </div>

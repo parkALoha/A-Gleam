@@ -50,6 +50,7 @@ export default async function AdminOrderDetailPage({
               {new Date(order.created_at).toLocaleString("th-TH", {
                 dateStyle: "long",
                 timeStyle: "short",
+                timeZone: "Asia/Bangkok",
               })}
             </p>
           </div>

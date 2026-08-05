@@ -94,6 +94,7 @@ export default async function AccountOrdersPage({
                   <p className="text-xs text-shop-text-soft">
                     {new Date(order.created_at).toLocaleDateString("th-TH", {
                       dateStyle: "long",
+                      timeZone: "Asia/Bangkok",
                     })}
                   </p>
                 </div>
