@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/admin/ImageUploader";
 import Select from "@/components/ui/Select";
 import HeroBanner from "@/components/HeroBanner";
+import CollapsibleSection from "@/components/admin/CollapsibleSection";
+import { useConfirm } from "@/components/admin/useConfirm";
+import { useToast } from "@/components/useToast";
 import type { HeroSlide, HeroLine } from "@/lib/shop-settings";
 import { THAI_BANKS, bankNameForCode } from "@/lib/thai-banks";
 
@@ -50,6 +53,8 @@ export default function ShopSettingsForm({
   products: { slug: string; name: string }[];
 }) {
   const router = useRouter();
+  const { confirm, dialog } = useConfirm();
+  const { showToast, toast } = useToast();
   const [values, setValues] = useState(initialValues);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +119,10 @@ export default function ShopSettingsForm({
       return;
     }
 
+    if (!(await confirm("ยืนยันบันทึกการตั้งค่าร้าน? การเปลี่ยนแปลงนี้จะมีผลกับหน้าร้านที่ลูกค้าเห็นทันที"))) {
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/settings", {
@@ -137,6 +146,7 @@ export default function ShopSettingsForm({
         return;
       }
       setSuccess(true);
+      showToast("บันทึกการตั้งค่าสำเร็จ ✓");
       router.refresh();
     } catch {
       setError("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
@@ -150,12 +160,12 @@ export default function ShopSettingsForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
-        <p className="font-medium text-shop-text">บัญชีรับโอนเงิน</p>
-        <p className="mt-1 text-xs text-shop-text-soft">
-          ข้อมูลนี้จะแสดงให้ลูกค้าเห็นตอนหน้าชำระเงิน
-        </p>
-
+      {dialog}
+      {toast}
+      <CollapsibleSection
+        title="บัญชีรับโอนเงิน"
+        description="ข้อมูลนี้จะแสดงให้ลูกค้าเห็นตอนหน้าชำระเงิน"
+      >
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium text-shop-text">ธนาคาร</label>
@@ -223,14 +233,12 @@ export default function ShopSettingsForm({
             />
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
-        <p className="font-medium text-shop-text">ตรวจสอบสลิปอัตโนมัติ (Slip2Go)</p>
-        <p className="mt-1 text-xs text-shop-text-soft">
-          เลือกว่าจะให้ระบบช่วยตรวจยอดเงินในสลิปแค่ไหน — สต็อกจะถูกตัดก็ต่อเมื่อออเดอร์ถูกยืนยันแล้วเท่านั้น
-          ไม่ว่าจะยืนยันเองหรือระบบยืนยันให้อัตโนมัติ
-        </p>
+      <CollapsibleSection
+        title="ตรวจสอบสลิปอัตโนมัติ (Slip2Go)"
+        description="เลือกว่าจะให้ระบบช่วยตรวจยอดเงินในสลิปแค่ไหน — สต็อกจะถูกตัดก็ต่อเมื่อออเดอร์ถูกยืนยันแล้วเท่านั้น ไม่ว่าจะยืนยันเองหรือระบบยืนยันให้อัตโนมัติ"
+      >
         <div className="mt-3">
           <Select
             value={values.slipVerificationMode}
@@ -240,11 +248,13 @@ export default function ShopSettingsForm({
             options={SLIP_VERIFICATION_OPTIONS}
           />
         </div>
-      </div>
+      </CollapsibleSection>
 
-      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
-        <div className="flex items-center justify-between">
-          <p className="font-medium text-shop-text">แบนเนอร์หน้าแรก (Hero)</p>
+      <CollapsibleSection
+        title="แบนเนอร์หน้าแรก (Hero)"
+        description="แต่ละสไลด์ตั้งข้อความ ตำแหน่งข้อความ และความเข้มของฉากหลังแยกกันได้ — ถ้ามีหลายสไลด์จะเลื่อนสลับกันเอง"
+      >
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={addSlide}
@@ -253,9 +263,6 @@ export default function ShopSettingsForm({
             + เพิ่มสไลด์
           </button>
         </div>
-        <p className="mt-1 text-xs text-shop-text-soft">
-          แต่ละสไลด์ตั้งข้อความ ตำแหน่งข้อความ และความเข้มของฉากหลังแยกกันได้ — ถ้ามีหลายสไลด์จะเลื่อนสลับกันเอง
-        </p>
 
         {values.heroSlides.length === 0 && (
           <p className="mt-3 text-sm text-shop-text-soft">
@@ -396,7 +403,7 @@ export default function ShopSettingsForm({
             </div>
           ))}
         </div>
-      </div>
+      </CollapsibleSection>
 
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">
         <label className="flex items-center gap-2 text-sm text-shop-text">

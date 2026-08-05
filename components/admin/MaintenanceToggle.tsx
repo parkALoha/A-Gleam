@@ -3,15 +3,25 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/useToast";
+import { useConfirm } from "@/components/admin/useConfirm";
 
 export default function MaintenanceToggle({ enabled: enabledProp }: { enabled: boolean }) {
   const router = useRouter();
   const { showToast, toast } = useToast();
+  const { confirm, dialog } = useConfirm();
   const [enabled, setEnabled] = useState(enabledProp);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleToggle() {
     const next = !enabled;
+    // Only confirm the risky direction — turning back on (reopening the
+    // site to customers) never needs a gate.
+    if (next) {
+      const ok = await confirm(
+        "ยืนยันปิดเว็บชั่วคราว? ลูกค้าจะเข้าหน้าร้านไม่ได้ทันทีจนกว่าจะเปิดอีกครั้ง",
+      );
+      if (!ok) return;
+    }
     setEnabled(next); // flip immediately — waiting on the round trip made the
     // switch feel broken, like it wasn't registering the tap at all.
     setSubmitting(true);
@@ -41,6 +51,7 @@ export default function MaintenanceToggle({ enabled: enabledProp }: { enabled: b
         enabled ? "bg-amber-50 ring-amber-200" : "bg-white ring-shop-blush-100"
       }`}
     >
+      {dialog}
       {toast}
       <div className="flex items-center justify-between gap-3">
         <div>
