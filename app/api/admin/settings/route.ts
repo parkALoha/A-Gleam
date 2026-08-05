@@ -3,9 +3,14 @@ import { z } from "zod";
 import { getAdminUser } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 
+const heroLineSchema = z.object({
+  text: z.string(),
+  size: z.number().min(0.1).max(50),
+});
+
 const heroSlideSchema = z.object({
   imageUrl: z.string().min(1),
-  headline: z.string().trim(),
+  lines: z.array(heroLineSchema),
   positionX: z.number().min(0).max(100),
   positionY: z.number().min(0).max(100),
   overlay: z.enum(["light", "medium", "dark"]),
