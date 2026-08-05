@@ -43,7 +43,12 @@ export async function PATCH(request: Request) {
 
   const body = schema.safeParse(await request.json().catch(() => null));
   if (!body.success) {
-    return NextResponse.json({ error: "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    const issue = body.error.issues[0];
+    const field = issue?.path.join(".") || "ข้อมูล";
+    return NextResponse.json(
+      { error: `ข้อมูลไม่ถูกต้องที่ "${field}": ${issue?.message ?? "รูปแบบไม่ถูกต้อง"}` },
+      { status: 400 },
+    );
   }
 
   const supabase = createServiceClient();
@@ -64,7 +69,7 @@ export async function PATCH(request: Request) {
     .eq("id", true);
 
   if (error) {
-    return NextResponse.json({ error: "บันทึกไม่สำเร็จ" }, { status: 400 });
+    return NextResponse.json({ error: `บันทึกไม่สำเร็จ: ${error.message}` }, { status: 400 });
   }
 
   return NextResponse.json({ success: true });
