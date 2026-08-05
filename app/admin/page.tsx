@@ -14,16 +14,27 @@ export default async function AdminHomePage() {
   const user = await getAdminSession();
 
   const supabase = createServiceClient();
-  const { data: statusRows } = await supabase.from("orders").select("status");
+  const countResults = await Promise.all(
+    ADMIN_SUMMARY_ITEMS.map(({ status }) =>
+      supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", status),
+    ),
+  );
+  const countsError = countResults.find((r) => r.error)?.error;
   const counts: Record<string, number> = {};
-  for (const row of statusRows ?? []) {
-    counts[row.status] = (counts[row.status] ?? 0) + 1;
-  }
+  countResults.forEach((r, i) => {
+    counts[ADMIN_SUMMARY_ITEMS[i].status] = r.count ?? 0;
+  });
 
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">แดชบอร์ด</h1>
       <p className="mt-1 text-sm text-shop-text-soft">ยินดีต้อนรับ {user.email}</p>
+
+      {countsError && (
+        <p className="mt-4 text-sm text-red-500">
+          โหลดจำนวนคำสั่งซื้อไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง
+        </p>
+      )}
 
       <div className="mt-6">
         <OrderStatusSummary

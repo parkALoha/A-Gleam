@@ -30,8 +30,11 @@ export default async function AdminAnalyticsPage() {
   rangeStart.setDate(rangeStart.getDate() - (DAYS - 1));
   rangeStart.setHours(0, 0, 0, 0);
 
-  const [{ data: salesOrders }, { data: itemRows }, { data: lowStockVariants }] =
-    await Promise.all([
+  const [
+    { data: salesOrders, error: salesError },
+    { data: itemRows, error: itemsError },
+    { data: lowStockVariants, error: stockError },
+  ] = await Promise.all([
       supabase
         .from("orders")
         .select("created_at, total_amount")
@@ -49,6 +52,7 @@ export default async function AdminAnalyticsPage() {
         .order("stock_quantity", { ascending: true })
         .limit(20),
     ]);
+  const hasError = salesError || itemsError || stockError;
 
   // Daily sales — fill every day in range so quiet days show as zero, not a gap.
   const dailyTotals = new Map<string, number>();
@@ -82,6 +86,12 @@ export default async function AdminAnalyticsPage() {
       <p className="mt-1 text-sm text-shop-text-soft">
         นับเฉพาะออเดอร์ที่ยืนยันแล้ว (รอจัดส่ง/จัดส่งแล้ว/จัดส่งสำเร็จ) ไม่รวมออเดอร์ที่ยังรอตรวจสอบหรือถูกปฏิเสธ
       </p>
+
+      {hasError && (
+        <p className="mt-4 text-sm text-red-500">
+          โหลดข้อมูลบางส่วนไม่สำเร็จ ตัวเลขที่เห็นอาจไม่ครบถ้วน ลองรีเฟรชหน้านี้อีกครั้ง
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-shop-blush-100">

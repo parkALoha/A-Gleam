@@ -44,6 +44,7 @@ export default async function Home({
 
     return (
       <>
+        <h1 className="sr-only">A GLEAM | อะ - กลีม</h1>
         <HeroBanner slides={settings.heroSlides} />
 
         <section id="products" className="mx-auto max-w-6xl scroll-mt-32 px-5 py-14">
@@ -79,6 +80,7 @@ export default async function Home({
 
   return (
     <>
+      <h1 className="sr-only">A GLEAM | อะ - กลีม</h1>
       <HeroBanner slides={settings.heroSlides} />
 
       <div id="products" className="scroll-mt-32">

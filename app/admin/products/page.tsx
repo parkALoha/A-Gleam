@@ -36,7 +36,7 @@ export default async function AdminProductsPage({
     productsQuery = productsQuery.ilike("name", `%${query}%`);
   }
 
-  const { data: products, count } = await productsQuery;
+  const { data: products, count, error } = await productsQuery;
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
@@ -54,7 +54,11 @@ export default async function AdminProductsPage({
 
       <ProductSearch defaultValue={query} />
 
-      {!products || products.length === 0 ? (
+      {error ? (
+        <p className="mt-10 text-center text-sm text-red-500">
+          โหลดรายการสินค้าไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง
+        </p>
+      ) : !products || products.length === 0 ? (
         <p className="mt-10 text-center text-shop-text-soft">
           {query ? `ไม่พบสินค้าที่ตรงกับ "${query}"` : "ยังไม่มีสินค้า"}
         </p>
@@ -80,7 +84,6 @@ export default async function AdminProductsPage({
                       alt=""
                       width={64}
                       height={64}
-                      unoptimized
                       className="h-full w-full object-cover"
                     />
                   )}

@@ -54,7 +54,7 @@ export default async function AdminOrdersPage({
     );
   }
 
-  const { data: orders, count } = await ordersQuery;
+  const { data: orders, count, error } = await ordersQuery;
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
@@ -79,7 +79,11 @@ export default async function AdminOrdersPage({
 
       <OrderSearch defaultValue={query} status={activeStatus} />
 
-      {!orders || orders.length === 0 ? (
+      {error ? (
+        <p className="mt-10 text-center text-sm text-red-500">
+          โหลดรายการคำสั่งซื้อไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง
+        </p>
+      ) : !orders || orders.length === 0 ? (
         <p className="mt-10 text-center text-shop-text-soft">
           {query ? `ไม่พบคำสั่งซื้อที่ตรงกับ "${query}"` : "ไม่มีคำสั่งซื้อในหมวดนี้"}
         </p>
