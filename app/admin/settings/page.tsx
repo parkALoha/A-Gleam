@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import ShopSettingsForm from "@/components/admin/ShopSettingsForm";
 import ReviewManager from "@/components/admin/ReviewManager";
 import PushNotificationToggle from "@/components/admin/PushNotificationToggle";
+import MaintenanceToggle from "@/components/admin/MaintenanceToggle";
 import { normalizeHeroSlide, type HeroSlide } from "@/lib/shop-settings";
 
 // Supabase's inferred type for a to-one embed (via a unique FK) is an
@@ -24,7 +25,7 @@ export default async function AdminSettingsPage() {
     supabase
       .from("shop_settings")
       .select(
-        "bank_name, bank_code, bank_account_name, bank_account_number, promptpay_qr_image_url, promptpay_id, hero_slides, reviews_section_enabled, slip_verification_mode",
+        "bank_name, bank_code, bank_account_name, bank_account_number, promptpay_qr_image_url, promptpay_id, hero_slides, reviews_section_enabled, slip_verification_mode, maintenance_mode",
       )
       .single(),
     supabase
@@ -41,6 +42,10 @@ export default async function AdminSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl px-8 py-10">
       <h1 className="text-xl font-semibold text-shop-text">ตั้งค่าร้าน</h1>
+
+      <div className="mt-6">
+        <MaintenanceToggle enabled={settings?.maintenance_mode ?? false} />
+      </div>
 
       <div className="mt-6">
         <PushNotificationToggle />

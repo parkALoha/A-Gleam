@@ -12,7 +12,13 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "ตั้งค่า" },
 ];
 
-export default function AdminSidebar({ adminEmail }: { adminEmail: string }) {
+export default function AdminSidebar({
+  adminEmail,
+  maintenanceMode,
+}: {
+  adminEmail: string;
+  maintenanceMode?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
@@ -25,6 +31,15 @@ export default function AdminSidebar({ adminEmail }: { adminEmail: string }) {
           <AdminLogoutButton />
         </div>
       </div>
+
+      {maintenanceMode && (
+        <Link
+          href="/admin/settings"
+          className="mt-3 block rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100"
+        >
+          🔧 ปิดเว็บชั่วคราวอยู่
+        </Link>
+      )}
 
       <nav className="mt-3 flex gap-1 overflow-x-auto md:mt-6 md:flex-1 md:flex-col md:space-y-1 md:overflow-visible">
         {NAV_ITEMS.map((item) => {

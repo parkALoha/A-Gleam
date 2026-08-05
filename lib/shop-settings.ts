@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export type HeroOverlay = "light" | "medium" | "dark";
@@ -58,6 +59,7 @@ export type ShopSettings = {
   promptpayId: string | null;
   heroSlides: HeroSlide[];
   reviewsSectionEnabled: boolean;
+  maintenanceMode: boolean;
 };
 
 // Rows saved before linkUrl/free-positioning existed won't have those
@@ -88,12 +90,15 @@ export function normalizeHeroSlide(
   };
 }
 
-export async function getShopSettings(): Promise<ShopSettings> {
+// Wrapped in React's cache() — with maintenance mode, both the (shop) and
+// admin layouts now call this on every request in addition to the page
+// itself, and this dedupes those into a single query per request.
+export const getShopSettings = cache(async (): Promise<ShopSettings> => {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase
     .from("shop_settings")
     .select(
-      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, promptpay_id, hero_slides, reviews_section_enabled",
+      "bank_name, bank_account_name, bank_account_number, promptpay_qr_image_url, promptpay_id, hero_slides, reviews_section_enabled, maintenance_mode",
     )
     .single();
 
@@ -109,5 +114,6 @@ export async function getShopSettings(): Promise<ShopSettings> {
     promptpayId: data.promptpay_id,
     heroSlides: ((data.hero_slides as Partial<HeroSlide>[] | null) ?? []).map(normalizeHeroSlide),
     reviewsSectionEnabled: data.reviews_section_enabled ?? false,
+    maintenanceMode: data.maintenance_mode ?? false,
   };
-}
+});

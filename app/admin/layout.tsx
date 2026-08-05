@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getAdminUser } from "@/lib/auth";
+import { getShopSettings } from "@/lib/shop-settings";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import PageLoading from "@/components/PageLoading";
 
@@ -20,9 +21,11 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen flex-1 bg-shop-cream">{children}</div>;
   }
 
+  const settings = await getShopSettings();
+
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-shop-cream md:flex-row">
-      <AdminSidebar adminEmail={admin.email ?? ""} />
+      <AdminSidebar adminEmail={admin.email ?? ""} maintenanceMode={settings.maintenanceMode} />
       <main className="flex-1">{children}</main>
     </div>
   );
