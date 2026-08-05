@@ -59,5 +59,9 @@ export default withSentryConfig(nextConfig, {
   // Only matters if org/project/authToken are set — otherwise source map
   // upload is skipped and this build option has nothing to widen.
   widenClientFileUpload: true,
-  disableLogger: true,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });
