@@ -76,6 +76,15 @@ export default function HeroBanner({
   const translateX = edgeTranslate(positionX, "0%", "-50%", "-100%");
   const translateY = edgeTranslate(positionY, "0%", "-50%", "-100%");
 
+  // Portrait photos get letterboxed by object-contain inside this wide,
+  // short box, leaving blurred margins on either side — without this, the
+  // text block sized itself off the box's full width and visibly spilled
+  // past the photo's real edges into the blurred margin. Measuring the
+  // box and each photo's natural size lets us cap the text to the photo's
+  // actual rendered width instead of guessing.
+  const [boxSize, setBoxSize] = useState({ w: 0, h: 0 });
+  const [naturalSizes, setNaturalSizes] = useState<Record<string, { w: number; h: number }>>({});
+
   useEffect(() => {
     if (editable || slides.length <= 1) return;
     const id = setInterval(() => {
@@ -83,6 +92,35 @@ export default function HeroBanner({
     }, SLIDE_INTERVAL_MS);
     return () => clearInterval(id);
   }, [slides.length, editable]);
+
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return;
+      setBoxSize({ w: entry.contentRect.width, h: entry.contentRect.height });
+    });
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, []);
+
+  function handlePhotoLoad(imageUrl: string, img: HTMLImageElement) {
+    setNaturalSizes((prev) =>
+      prev[imageUrl]?.w === img.naturalWidth && prev[imageUrl]?.h === img.naturalHeight
+        ? prev
+        : { ...prev, [imageUrl]: { w: img.naturalWidth, h: img.naturalHeight } },
+    );
+  }
+
+  const activeNatural = active ? naturalSizes[active.imageUrl] : undefined;
+  let photoWidthPx: number | null = null;
+  if (activeNatural && boxSize.w > 0 && boxSize.h > 0) {
+    const containerAspect = boxSize.w / boxSize.h;
+    const photoAspect = activeNatural.w / activeNatural.h;
+    photoWidthPx = photoAspect > containerAspect ? boxSize.w : boxSize.h * photoAspect;
+  }
+  // Small margin so text doesn't touch the photo's exact edge.
+  const textMaxWidthPx = photoWidthPx ? Math.round(photoWidthPx * 0.92) : null;
 
   function setPositionFromPointer(clientX: number, clientY: number) {
     const box = boxRef.current;
@@ -153,6 +191,7 @@ export default function HeroBanner({
                 sizes="100vw"
                 priority={index === 0}
                 className="object-contain"
+                onLoad={(e) => handlePhotoLoad(slide.imageUrl, e.currentTarget)}
               />
             </div>
           ))
@@ -167,12 +206,15 @@ export default function HeroBanner({
         />
 
         <div
-          className="absolute flex w-[85%] max-w-sm flex-col items-center px-5 text-center text-white"
+          className={`absolute flex w-[85%] flex-col items-center px-5 text-center text-white ${
+            editable ? "max-w-sm" : "max-w-sm md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl"
+          }`}
           style={{
             left: `${positionX}%`,
             top: `${positionY}%`,
             transform: `translate(${translateX}, ${translateY})`,
             containerType: "inline-size",
+            maxWidth: !editable && textMaxWidthPx ? `${textMaxWidthPx}px` : undefined,
           }}
         >
           {(active?.lines ?? []).map((line, i) => (
