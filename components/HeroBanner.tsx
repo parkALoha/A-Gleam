@@ -97,20 +97,32 @@ export default function HeroBanner({
     <section className="relative isolate overflow-hidden bg-shop-text">
       <div
         ref={boxRef}
-        className={`${HERO_HEIGHT_CLASSES} ${editable ? "touch-none cursor-crosshair select-none" : ""}`}
+        className={`${HERO_HEIGHT_CLASSES} ${editable ? "cursor-crosshair select-none" : ""}`}
         style={{ containerType: "inline-size" }}
+        // Deliberately not using touch-action:none / pointerdown here — on
+        // mobile that made any scroll gesture that merely started over the
+        // image register as "set position", hijacking the page scroll.
+        // onClick only fires for a genuine tap/click with no drag in
+        // between, so it can't misfire on a scroll-swipe. Continuous
+        // drag-to-fine-tune is still available, but mouse-only — touch
+        // dragging is exactly the gesture that conflicts with scrolling.
+        onClick={
+          editable
+            ? (e) => setPositionFromPointer(e.clientX, e.clientY)
+            : undefined
+        }
         onPointerDown={
           editable
             ? (e) => {
+                if (e.pointerType !== "mouse") return;
                 e.currentTarget.setPointerCapture(e.pointerId);
-                setPositionFromPointer(e.clientX, e.clientY);
               }
             : undefined
         }
         onPointerMove={
           editable
             ? (e) => {
-                if (e.buttons !== 1) return;
+                if (e.pointerType !== "mouse" || e.buttons !== 1) return;
                 setPositionFromPointer(e.clientX, e.clientY);
               }
             : undefined
@@ -193,7 +205,10 @@ export default function HeroBanner({
               type="button"
               aria-label={`ตำแหน่ง ${label}`}
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => onPositionChange?.(x, y)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPositionChange?.(x, y);
+              }}
               className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/80 bg-black/10 transition-colors hover:bg-white/60"
               style={{ left: `${x}%`, top: `${y}%` }}
             />
@@ -218,8 +233,8 @@ export default function HeroBanner({
 
       {editable && (
         <p className="bg-shop-beige-50 px-3 py-1.5 text-center text-[11px] text-shop-text-soft">
-          ตำแหน่ง: X {positionX}% · Y {positionY}% — คลิกจุดบนภาพเพื่อเลือกตำแหน่งสำเร็จรูป
-          หรือลากอิสระ
+          ตำแหน่ง: X {positionX}% · Y {positionY}% — แตะบนภาพเพื่อวางตำแหน่ง
+          (บนคอมพิวเตอร์ลากด้วยเมาส์เพื่อปรับละเอียดได้)
         </p>
       )}
     </section>

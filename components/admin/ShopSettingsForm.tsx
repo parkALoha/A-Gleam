@@ -339,7 +339,7 @@ export default function ShopSettingsForm({
 
               <div className="mt-3">
                 <label className="text-xs text-shop-text-soft">
-                  ตำแหน่งข้อความ — คลิกหรือลากบนภาพเพื่อวาง
+                  ตำแหน่งข้อความ — แตะบนภาพเพื่อวางตำแหน่ง
                 </label>
                 <div className="mt-1.5 overflow-hidden rounded-lg ring-1 ring-shop-blush-100">
                   {slide.imageUrl ? (

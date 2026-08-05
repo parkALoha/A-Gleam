@@ -41,6 +41,18 @@ export default function AdminSidebar({
         </Link>
       )}
 
+      {/* Opens in a new tab so it carries the same login — the admin bypass
+          in proxy.ts means this shows the real site even during maintenance,
+          which a fresh incognito/logged-out tab never would. */}
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 block rounded-xl border border-shop-blush-100 px-3 py-2 text-xs font-medium text-shop-text-soft hover:bg-shop-blush-50 hover:text-shop-text"
+      >
+        ดูหน้าร้าน ↗
+      </a>
+
       <nav className="mt-3 flex gap-1 overflow-x-auto md:mt-6 md:flex-1 md:flex-col md:space-y-1 md:overflow-visible">
         {NAV_ITEMS.map((item) => {
           const active =

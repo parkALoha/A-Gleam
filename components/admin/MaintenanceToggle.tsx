@@ -4,25 +4,31 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/useToast";
 
-export default function MaintenanceToggle({ enabled }: { enabled: boolean }) {
+export default function MaintenanceToggle({ enabled: enabledProp }: { enabled: boolean }) {
   const router = useRouter();
   const { showToast, toast } = useToast();
+  const [enabled, setEnabled] = useState(enabledProp);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleToggle() {
+    const next = !enabled;
+    setEnabled(next); // flip immediately — waiting on the round trip made the
+    // switch feel broken, like it wasn't registering the tap at all.
     setSubmitting(true);
     try {
       const res = await fetch("/api/admin/maintenance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !enabled }),
+        body: JSON.stringify({ enabled: next }),
       });
       if (!res.ok) {
+        setEnabled(!next);
         showToast("เปลี่ยนสถานะไม่สำเร็จ ลองใหม่อีกครั้ง");
         return;
       }
       router.refresh();
     } catch {
+      setEnabled(!next);
       showToast("เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
